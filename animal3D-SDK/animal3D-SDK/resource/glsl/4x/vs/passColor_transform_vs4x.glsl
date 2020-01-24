@@ -35,11 +35,9 @@ layout (location = 0) in vec4 aPosition;
 
 uniform mat4 uMVP;
 
-in vec4 inColor;
+layout (location = 3) in vec4 inColor;
 
 out vec4 secColor;
-
-
 
 
 void main()
