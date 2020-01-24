@@ -305,7 +305,7 @@ void a3demo_render_main(const a3_DemoState *demoState,
 
 	// ****TO-DO: 
 	//	-> 2.1c: convenient array of textures for scene objects
-	/*
+	
 	// temp texture pointers
 	const a3_Texture* texture_dm[] = {
 		demoState->tex_stone_dm,
@@ -321,11 +321,11 @@ void a3demo_render_main(const a3_DemoState *demoState,
 		demoState->tex_mars_sm,
 		demoState->tex_checker,
 	};
-	*/
+	
 
 	// ****TO-DO: 
 	//	-> 2.1d: convenient array of forward lighting shader programs
-	/*
+	
 	// forward pipeline shader programs
 	const a3_DemoStateShaderProgram* forwardProgram[] = {
 		demoState->prog_drawColorUnif,
@@ -334,7 +334,7 @@ void a3demo_render_main(const a3_DemoState *demoState,
 		demoState->prog_drawPhong_multi,
 		demoState->prog_drawNonphoto_multi,
 	};
-	*/
+	
 
 	// ****TO-DO: 
 	//	-> 3.1b: convenient arrays of lighting data
