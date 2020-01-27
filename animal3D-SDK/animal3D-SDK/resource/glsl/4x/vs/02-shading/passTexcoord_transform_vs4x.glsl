@@ -37,9 +37,9 @@ layout (location = 0) in vec4 aPosition;
 
 uniform mat4 uMVP;
 
-layout (location = 8) in vec2 texCoor;
-uniform mat2 uAtlas;
-out vec2 texCoorVar;
+layout (location = 8) in vec4 texCoor;
+uniform mat4 uAtlas;
+out vec4 texCoorVar;
 
 void main()
 {

@@ -33,14 +33,14 @@
 
 
 
-layout (location = 0) in vec2 texCoorVar;
-uniform sampler2D uTex_sm;
+in vec4 texCoorVar;
+uniform sampler2D uTex_dm;
 
 
 out vec4 rtFragColor;
 
 void main()
 {
-	vec4 outVec = texture(uTex_sm, texCoorVar).rgba;
+	vec4 outVec = texture(uTex_dm, texCoorVar.xy).rgba;
 	rtFragColor = outVec;
 }
