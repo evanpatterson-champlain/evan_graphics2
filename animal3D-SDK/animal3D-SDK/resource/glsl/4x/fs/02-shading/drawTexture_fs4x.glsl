@@ -41,6 +41,6 @@ out vec4 rtFragColor;
 
 void main()
 {
-	vec4 outVec = texture(uTex_dm, texCoorVar.xy).rgba;
+	vec4 outVec = textureProj(uTex_dm, texCoorVar).rgba;
 	rtFragColor = outVec;
 }
