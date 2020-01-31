@@ -56,7 +56,7 @@ void main()
 
 	vec4 col = vec4(0.0);
 
-	for(int i = 1; i < uLightPos.length; i++){
+	for(int i = 0; i < uLightPos.length; i++){
 		lighting += max(dot(normVar, normalize(uLightPos[i] - viewSpacePos)), 0.0);
 		col += uLightCol[i] * dot(normVar, normalize(uLightPos[i] - viewSpacePos));
 	}

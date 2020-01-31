@@ -59,7 +59,7 @@ out vec4 texCoorVar;
 void main()
 {
 	viewSpacePos = uMV * aPosition;
-	normVar = normalize(uMV_nrm * normIn);
+	normVar = uMV_nrm * normIn;
 	gl_Position = uP * viewSpacePos;
 	
 	//texture
