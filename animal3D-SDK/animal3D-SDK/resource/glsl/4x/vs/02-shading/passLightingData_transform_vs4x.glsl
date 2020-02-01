@@ -40,8 +40,28 @@
 
 layout (location = 0) in vec4 aPosition;
 
+uniform mat4 uMV;
+uniform mat4 uP;
+
+out vec4 viewSpacePos;
+
+// normals
+layout (location = 2) in vec4 normIn;
+uniform mat4 uMV_nrm;
+out vec4 normVar;
+
+
+layout (location = 8) in vec4 texCoor;
+uniform mat4 uAtlas;
+out vec4 texCoorVar;
+
+
 void main()
 {
-	// DUMMY OUTPUT: directly assign input position to output position
-	gl_Position = aPosition;
+	viewSpacePos = uMV * aPosition;
+	normVar = uMV_nrm * normIn;
+	gl_Position = uP * viewSpacePos;
+	
+	//texture
+	texCoorVar = uAtlas * texCoor;
 }
