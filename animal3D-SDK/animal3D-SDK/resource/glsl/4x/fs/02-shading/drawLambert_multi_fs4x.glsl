@@ -56,10 +56,14 @@ void main()
 
 	vec4 col = vec4(0.0);
 
+	vec4 normalizedNormal = normalize(normVar);
+
 	for(int i = 0; i < uLightPos.length; i++){
-		lighting += max(dot(normVar, normalize(uLightPos[i] - viewSpacePos)), 0.0);
-		col += uLightCol[i] * dot(normVar, normalize(uLightPos[i] - viewSpacePos));
+		lighting += max(dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos)), 0.0);
+		col += uLightCol[i] * dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos));
 	}
+
+	col /= 4.0;
 	
 	rtFragColor = mix(max(tex_out * lighting, 0.0), col, 0.5);
 }

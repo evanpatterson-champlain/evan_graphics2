@@ -62,12 +62,14 @@ void main()
 		vec4 l = normalize(uLightPos[i] - viewSpacePos);
 		float lighting = max(dot(normalizedNormVar, l), 0.0);
 		vec4 diffuse = tex_out * lighting;
-		vec4 specular = pow(max(dot(reflect(-l, normalizedNormVar), normalize(uLightPos[i] - viewSpacePos)), 0.0), 8.0) * vec4(0.5);
+		vec4 specular = pow(max(dot(reflect(-l, normalizedNormVar), normalize(uLightPos[i] - viewSpacePos)), 0.0), 8.0) * vec4(0.7);
 
 		outVec += diffuse + specular;
 
 		col += uLightCol[i] * dot(normalizedNormVar, normalize(uLightPos[i] - viewSpacePos));
 	}
+
+	col /= 4.0;
 	
 	rtFragColor = mix(max(outVec, 0.0), col, 0.5);
 }
