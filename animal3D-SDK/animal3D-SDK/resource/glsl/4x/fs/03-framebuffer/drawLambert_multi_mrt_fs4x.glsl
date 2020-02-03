@@ -33,10 +33,67 @@
 //	5) set location of final color render target (location 0)
 //	6) declare render targets for each attribute and shading component
 
-out vec4 rtFragColor;
+uniform vec4 uLightPos[4];
+uniform vec4 uLightCol[4];
+
+uniform sampler2D uTex_dm;
+
+
+// in position
+in vec4 viewSpacePos;
+in vec4 normVar;
+
+// in texture
+in vec4 texCoorVar;
+
+//out vec4 rtFragColor;
+
+layout (location = 0) out vec4 colorOut;
+layout (location = 1) out vec4 viewPosOut;
+layout (location = 2) out vec4 viewNormOut;
+layout (location = 3) out vec4 texCoorOut;
+layout (location = 4) out vec4 diffMapOut;
+layout (location = 6) out vec4 diffTotalOut;
+
+
 
 void main()
 {
-	// DUMMY OUTPUT: all fragments are OPAQUE RED
-	rtFragColor = vec4(1.0, 0.0, 0.0, 1.0);
+	vec4 tex_out = max(textureProj(uTex_dm, texCoorVar), 0.0);
+
+	float lighting = 0.0;
+
+	vec4 col = vec4(0.0);
+
+	vec4 normalizedNormal = normalize(normVar);
+
+	for(int i = 0; i < uLightPos.length; i++){
+		lighting += max(dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos)), 0.0);
+		col += uLightCol[i] * dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos));
+	}
+
+	col /= 4.0;
+	
+	// full color
+	colorOut = mix(max(tex_out * lighting, 0.0), col, 0.5);
+	colorOut.a = 1.0;
+
+	// view position
+	viewPosOut = viewSpacePos;
+
+	// normal
+	viewNormOut = normalizedNormal;
+	viewNormOut.a = 1.0;
+	
+	// texture coordinates
+	texCoorOut = texCoorVar;
+
+	// diffuse map
+	diffMapOut = min(tex_out * lighting, 1.0);
+	diffMapOut.a = 1.0;
+
+	// diffuse total
+	diffTotalOut = mix(vec4(1.0), col*4.0, 0.3) * lighting;
+	diffTotalOut.a = 1.0;
+
 }

@@ -56,9 +56,15 @@ uniform mat4 uAtlas;
 out vec4 texCoorVar;
 
 
+out vec4 viewPos_;
+
+
 void main()
 {
 	viewSpacePos = uMV * aPosition;
+
+	viewPos_ = aPosition;
+
 	normVar = uMV_nrm * normIn;
 	gl_Position = uP * viewSpacePos;
 	
