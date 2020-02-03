@@ -52,33 +52,66 @@ layout (location = 1) out vec4 viewPosOut;
 layout (location = 2) out vec4 viewNormOut;
 layout (location = 3) out vec4 texCoorOut;
 layout (location = 4) out vec4 diffMapOut;
+layout (location = 5) out vec4 specMapOut;
 layout (location = 6) out vec4 diffTotalOut;
+layout (location = 7) out vec4 specTotalOut;
+
 
 out vec4 rtFragColor;
 
 
 void main()
 {
-	vec4 tex_out = textureProj(uTex_dm, texCoorVar);
+	vec3 tex_out = textureProj(uTex_dm, texCoorVar).rgb;
 
 	vec3 col = vec3(0.0);
 
 	vec3 outVec = vec3(0.0);
 
-	vec4 normalizedNormVar = normalize(normVar);
+	vec4 normalizedNorm = normalize(normVar);
+	vec3 usedNormal = normalizedNorm.xyz;
+
+	float diffuseMap = 0.0;
+	vec3 specularMap = vec3(0.0);
 
 	for(int i = 0; i < uLightPos.length; i++){
-		vec4 l = normalize(uLightPos[i] - viewSpacePos);
-		float lighting = max(dot(normalizedNormVar, l), 0.0);
-		vec3 diffuse = tex_out.xyz * lighting;
-		vec3 specular = pow(max(dot(reflect(-l, normalizedNormVar), normalize(uLightPos[i] - viewSpacePos)), 0.0), 8.0) * vec3(0.7);
+		vec3 l = normalize(uLightPos[i].xyz - viewSpacePos.xyz);
+		float lighting = max(dot(usedNormal, l), 0.0);
+		diffuseMap += lighting;
+		vec3 diffuse = tex_out * lighting;
+		vec3 specular = pow(max(dot(reflect(-l, usedNormal), normalize(uLightPos[i].xyz - viewSpacePos.xyz)), 0.0), 8.0) * vec3(0.7);
+		specularMap += specular;
 
 		outVec += diffuse + specular;
 
-		col += uLightCol[i] * dot(normalizedNormVar, normalize(uLightPos[i] - viewSpacePos));
+		col += uLightCol[i].xyz * dot(usedNormal, normalize(uLightPos[i].xyz - viewSpacePos.xyz));
 	}
 
 	col /= 4.0;
 	
-	colorOut = vec4(1.0);//vec4(mix(max(outVec, 0.0), col, 0.5), 1.0);
+	colorOut = vec4(mix(max(outVec, 0.0), col, 0.5), 1.0);
+
+	// view position
+	viewPosOut = viewSpacePos;
+
+	// normal
+	viewNormOut = normalizedNorm;
+	viewNormOut.a = 1.0;
+	
+	// texture coordinates
+	texCoorOut = texCoorVar;
+
+	// diffuse map
+	diffMapOut = vec4(min(tex_out * diffuseMap, 1.0), 1.0);
+
+	// specular map
+	specMapOut = vec4(min(tex_out * specularMap, 1.0), 1.0);
+
+	// diffuse total
+	diffTotalOut = vec4(mix(vec3(1.0), col*4.0, 0.3) * diffuseMap, 1.0);
+
+	// specular total
+	specTotalOut = vec4((specularMap * 0.7) + (col*4.0 * 0.3), 1.0);
+
+
 }

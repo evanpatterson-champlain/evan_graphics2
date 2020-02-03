@@ -50,28 +50,31 @@ out vec4 rtFragColor;
 
 void main()
 {
-	vec4 tex_out = textureProj(uTex_dm, texCoorVar);
+	vec3 tex_out = textureProj(uTex_dm, texCoorVar).rgb;
 
-	vec4 col = vec4(0.0);
+	vec3 col = vec3(0.0);
 
-	vec4 outVec = vec4(0.0);
+	vec3 outVec = vec3(0.0);
 
 	vec4 normalizedNormVar = normalize(normVar);
+	vec3 usedNormal = normalizedNormVar.xyz;
+
+
 
 	for(int i = 0; i < uLightPos.length; i++){
-		vec4 l = normalize(uLightPos[i] - viewSpacePos);
-		float lighting = max(dot(normalizedNormVar, l), 0.0);
-		vec4 diffuse = tex_out * lighting;
-		vec4 specular = pow(max(dot(reflect(-l, normalizedNormVar), normalize(uLightPos[i] - viewSpacePos)), 0.0), 8.0) * vec4(0.7);
+		vec3 l = normalize(uLightPos[i].xyz - viewSpacePos.xyz);
+		float lighting = max(dot(usedNormal, l), 0.0);
+		vec3 diffuse = tex_out * lighting;
+		vec3 specular = pow(max(dot(reflect(-l, usedNormal), normalize(uLightPos[i].xyz - viewSpacePos.xyz)), 0.0), 8.0) * vec3(0.7);
 
 		outVec += diffuse + specular;
 
-		col += uLightCol[i] * dot(normalizedNormVar, normalize(uLightPos[i] - viewSpacePos));
+		col += uLightCol[i].xyz * dot(usedNormal, normalize(uLightPos[i].xyz - viewSpacePos.xyz));
 	}
 
 	col /= 4.0;
 	
-	rtFragColor = vec4(1.0);//mix(max(outVec, 0.0), col, 0.5);
+	rtFragColor = vec4(mix(max(outVec, 0.0), col, 0.5), 1.0);
 }
 
 

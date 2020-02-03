@@ -53,7 +53,7 @@ out vec4 rtFragColor;
 
 void main()
 {
-	vec4 tex_out = max(textureProj(uTex_dm, texCoorVar).rgba, 0.0);
+	vec4 tex_out = max(textureProj(uTex_dm, texCoorVar), 0.0);
 
 	float lighting = 0.0;
 
