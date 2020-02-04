@@ -59,41 +59,37 @@ layout (location = 6) out vec4 diffTotalOut;
 
 void main()
 {
-	vec4 tex_out = max(textureProj(uTex_dm, texCoorVar), 0.0);
+	vec3 tex_out = max(textureProj(uTex_dm, texCoorVar), 0.0).rgb;
 
-	float lighting = 0.0;
+	float lightingTotal = 0.0;
 
-	vec4 col = vec4(0.0);
+	vec3 col = vec3(0.0);
 
 	vec4 normalizedNormal = normalize(normVar);
+	vec3 usedNormal = normalizedNormal.xyz;
 
 	for(int i = 0; i < uLightPos.length; i++){
-		lighting += max(dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos)), 0.0);
-		col += uLightCol[i] * dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos));
+		float lighting = max(dot(usedNormal, normalize(uLightPos[i].xyz - viewSpacePos.xyz)), 0.0);
+		lightingTotal += lighting;
+		col += uLightCol[i].rgb * lighting;
 	}
 
-	col /= 4.0;
-	
 	// full color
-	colorOut = mix(max(tex_out * lighting, 0.0), col, 0.5);
-	colorOut.a = 1.0;
+	colorOut = vec4(max(col * tex_out, 0.0), 1.0);
 
 	// view position
 	viewPosOut = viewSpacePos;
 
 	// normal
-	viewNormOut = normalizedNormal;
-	viewNormOut.a = 1.0;
-	
+	viewNormOut = vec4(usedNormal, 1.0);
+
 	// texture coordinates
 	texCoorOut = texCoorVar;
 
 	// diffuse map
-	diffMapOut = min(tex_out * lighting, 1.0);
-	diffMapOut.a = 1.0;
+	diffMapOut = vec4(tex_out, 1.0);
 
 	// diffuse total
-	diffTotalOut = mix(vec4(1.0), col*4.0, 0.3) * lighting;
-	diffTotalOut.a = 1.0;
+	diffTotalOut = vec4(col, 1.0);
 
 }

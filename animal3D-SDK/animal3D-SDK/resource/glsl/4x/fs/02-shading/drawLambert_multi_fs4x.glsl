@@ -53,20 +53,5 @@ out vec4 rtFragColor;
 
 void main()
 {
-	vec4 tex_out = max(textureProj(uTex_dm, texCoorVar), 0.0);
-
-	float lighting = 0.0;
-
-	vec4 col = vec4(0.0);
-
-	vec4 normalizedNormal = normalize(normVar);
-
-	for(int i = 0; i < uLightPos.length; i++){
-		lighting += max(dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos)), 0.0);
-		col += uLightCol[i] * dot(normalizedNormal, normalize(uLightPos[i] - viewSpacePos));
-	}
-
-	col /= 4.0;
-	
-	rtFragColor = mix(max(tex_out * lighting, 0.0), col, 0.5);
+	rtFragColor = vec4(1.0);
 }
