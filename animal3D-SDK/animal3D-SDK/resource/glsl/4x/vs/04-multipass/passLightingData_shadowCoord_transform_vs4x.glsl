@@ -34,8 +34,12 @@
 
 layout (location = 0) in vec4 aPosition;
 
+uniform mat4 uMVPB;
+
+out vec4 shadowCoord;
+
+
 void main()
 {
-	// DUMMY OUTPUT: directly assign input position to output position
-	gl_Position = aPosition;
+	shadowCoord = uMVPB * aPosition;
 }

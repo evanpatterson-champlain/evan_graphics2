@@ -34,8 +34,11 @@
 
 out vec4 rtFragColor;
 
+in vec4 shadowCoord;
+
 void main()
 {
-	// DUMMY OUTPUT: all fragments are OPAQUE GREEN
+
+
 	rtFragColor = vec4(0.0, 1.0, 0.0, 1.0);
 }
