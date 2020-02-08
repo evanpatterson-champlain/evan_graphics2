@@ -30,8 +30,10 @@
 
 out vec4 rtFragColor;
 
+uniform sampler2D uTex_dm;
+
 void main()
 {
-	// DUMMY OUTPUT: all fragments are OPAQUE DARK GREY
-	rtFragColor = vec4(0.2, 0.2, 0.2, 1.0);
+	//vec4 newCol = textureProj(uTex_proj, texCoorVar);
+	rtFragColor = vec4(1.0);
 }
