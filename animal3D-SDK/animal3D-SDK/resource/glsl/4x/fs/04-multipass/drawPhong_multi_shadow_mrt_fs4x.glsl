@@ -32,13 +32,83 @@
 //	3) declare shadow map texture
 //	4) perform shadow test
 
-out vec4 rtFragColor;
 
+uniform vec4 uLightPos[4];
+uniform vec4 uLightCol[4];
+
+uniform sampler2D uTex_dm;
+uniform sampler2D uTex_sm;
+
+// in position
+in vec4 viewSpacePos;
+in vec4 normVar;
+
+// in texture
+in vec4 texCoorVar;
+
+layout (location = 0) out vec4 colorOut;
+/*
+layout (location = 1) out vec4 viewPosOut;
+layout (location = 2) out vec4 viewNormOut;
+layout (location = 3) out vec4 texCoorOut;
+layout (location = 4) out vec4 diffMapOut;
+layout (location = 5) out vec4 specMapOut;
+layout (location = 6) out vec4 diffTotalOut;
+layout (location = 7) out vec4 specTotalOut;
+*/
+
+//shadows
 in vec4 shadowCoord;
+uniform sampler2D uTex_shadow;
+uniform sampler2D uTex_proj;
+
+
+
+float pow8(float f){
+	f *= f;
+	f *= f;
+	f *= f;
+	return f;
+}
+
+
+
 
 void main()
 {
+	
+	vec3 tex_out = max(textureProj(uTex_dm, texCoorVar), 0.0).rgb;
+	vec3 tex_out_s = max(textureProj(uTex_sm, texCoorVar), 0.0).rgb;
+
+	float lightingTotal = 0.0; // lighting is basically diffuse
+	float specularTotal = 0.0;
+
+	vec3 colDiffuse = vec3(0.0);
+	vec3 colSpecular = vec3(0.0);
+
+	vec4 normalizedNormal = normalize(normVar);
+	vec3 usedNormal = normalizedNormal.xyz;
+
+	for(int i = 0; i < uLightPos.length; i++){
+		vec3 l = normalize(uLightPos[i].xyz - viewSpacePos.xyz);
+		float lighting = max(dot(usedNormal, l), 0.0);
+		float specular = pow8(max(dot(reflect(-l, usedNormal), normalize(-viewSpacePos.xyz)), 0.0)) * 0.7;
+
+		lightingTotal += lighting;
+		specularTotal += specular;
+
+		colDiffuse += uLightCol[i].rgb * lighting;
+		colSpecular += uLightCol[i].rgb * specular;
+	}
+	
+	colorOut = vec4(max((colDiffuse * tex_out) + (colSpecular * tex_out_s), 0.0), 1.0);
+	
+
+	float shadowSample = texture2D(uTex_shadow, shadowCoord.xy).r;
+
+	if (shadowCoord.z > (shadowSample + 0.0025)) {
+		colorOut.rgb *= 0.2;
+	}
 
 
-	rtFragColor = vec4(0.0, 1.0, 0.0, 1.0);
 }

@@ -34,12 +34,43 @@
 
 layout (location = 0) in vec4 aPosition;
 
-uniform mat4 uMVPB;
+uniform mat4 uMV;
+uniform mat4 uP;
 
+out vec4 viewSpacePos;
+
+// normals
+layout (location = 2) in vec4 normIn;
+uniform mat4 uMV_nrm;
+out vec4 normVar;
+
+
+layout (location = 8) in vec4 texCoor;
+uniform mat4 uAtlas;
+out vec4 texCoorVar;
+
+
+out vec4 viewPos_;
+
+
+
+uniform mat4 uMVPB_other;
 out vec4 shadowCoord;
+
+
 
 
 void main()
 {
-	shadowCoord = uMVPB * aPosition;
+	viewSpacePos = uMV * aPosition;
+
+	viewPos_ = aPosition;
+
+	normVar = uMV_nrm * normIn;
+	gl_Position = uP * viewSpacePos;
+
+	shadowCoord = uMVPB_other * aPosition;
+	
+	//texture
+	texCoorVar = uAtlas * texCoor;
 }
