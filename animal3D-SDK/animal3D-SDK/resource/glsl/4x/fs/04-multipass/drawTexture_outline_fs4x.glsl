@@ -32,8 +32,46 @@ out vec4 rtFragColor;
 
 uniform sampler2D uTex_dm;
 
+in vec4 texCoorVar;
+
+uniform vec4 uColor;
+uniform double uAxis;
+uniform vec2 uSize;
+
+uniform sampler2D uImage1;
+
+vec4 iBasis = vec4(1.0, 0.0, 0.0, 0.0);
+vec4 jBasis = vec4(0.0, 1.0, 0.0, 0.0);
+
+float lineSize = 0.005;
+float tolerance = 0.003;
+
+
+
 void main()
 {
-	//vec4 newCol = textureProj(uTex_proj, texCoorVar);
-	rtFragColor = vec4(1.0);
+	
+	vec4 camDistance = textureProj(uImage1, texCoorVar);
+
+	vec4 rightLoc = texCoorVar + (iBasis * lineSize);
+	vec4 leftLoc = texCoorVar - (iBasis * lineSize);
+	vec4 upLoc = texCoorVar + (jBasis * lineSize);
+	vec4 downLoc = texCoorVar - (jBasis * lineSize);
+
+	bool rightDiff = (camDistance.x - textureProj(uImage1, rightLoc).x) > tolerance;
+	bool leftDiff = (camDistance.x - textureProj(uImage1, leftLoc).x) > tolerance;
+	bool upDiff = (camDistance.x - textureProj(uImage1, upLoc).x) > tolerance;
+	bool downDiff = (camDistance.x - textureProj(uImage1, downLoc).x) > tolerance;
+
+	float lineModifier;
+	if (rightDiff || leftDiff || upDiff || downDiff) {
+		lineModifier = 0.0;
+	}
+	else {
+		lineModifier = 1.0;
+	}
+
+	rtFragColor = textureProj(uTex_dm, texCoorVar) * lineModifier;
+	
+
 }

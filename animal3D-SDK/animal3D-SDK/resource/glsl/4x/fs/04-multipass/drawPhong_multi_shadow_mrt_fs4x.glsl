@@ -46,6 +46,9 @@ in vec4 normVar;
 // in texture
 in vec4 texCoorVar;
 
+out vec4 coordinates;
+
+
 layout (location = 0) out vec4 colorOut;
 /*
 layout (location = 1) out vec4 viewPosOut;
@@ -70,8 +73,6 @@ float pow8(float f){
 	f *= f;
 	return f;
 }
-
-
 
 
 void main()
@@ -103,7 +104,6 @@ void main()
 	
 	colorOut = vec4(max((colDiffuse * tex_out) + (colSpecular * tex_out_s), 0.0), 1.0);
 	
-
 	float shadowSample = texture2D(uTex_shadow, shadowCoord.xy).r;
 
 	if (shadowCoord.z > (shadowSample + 0.0025)) {

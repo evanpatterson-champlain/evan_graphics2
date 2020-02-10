@@ -36,13 +36,22 @@
 layout (location = 0) in vec4 aPosition;
 
 uniform mat4 uMVP;
+uniform mat4 uMV;
 
 layout (location = 8) in vec4 texCoor;
 uniform mat4 uAtlas;
 out vec4 texCoorVar;
 
+layout (location = 2) in vec4 normIn;
+uniform mat4 uMV_nrm;
+out vec4 normVar;
+
+out vec4 viewForNormal;
+
 void main()
 {
 	gl_Position = uMVP * aPosition;
 	texCoorVar = uAtlas * texCoor;
+	normVar = uMV_nrm * normIn;
+	viewForNormal = uMV * aPosition;
 }

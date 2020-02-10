@@ -37,6 +37,7 @@ uniform sampler2D uTex_dm;
 
 out vec4 rtFragColor;
 
+
 void main()
 {
 	vec4 outVec = textureProj(uTex_dm, texCoorVar).rgba;
