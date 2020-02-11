@@ -106,9 +106,9 @@ void main()
 	
 	float shadowSample = texture2D(uTex_shadow, shadowCoord.xy).r;
 
-	if (shadowCoord.z > (shadowSample + 0.0025)) {
-		colorOut.rgb *= 0.2;
-	}
 
+	float s = step(shadowCoord.z,(shadowSample + 0.0025)) * 0.8;
+
+	colorOut.rgb *= (0.2 + s);
 
 }
