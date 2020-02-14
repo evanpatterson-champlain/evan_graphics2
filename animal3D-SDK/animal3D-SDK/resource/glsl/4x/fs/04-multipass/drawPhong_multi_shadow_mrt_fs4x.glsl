@@ -106,10 +106,7 @@ void main()
 	
 
 	vec3 shadowCoordXYZ = shadowCoord.xyz / shadowCoord.w;
-
 	float shadowSample = texture2D(uTex_shadow, shadowCoordXYZ.xy).r;
-
-
 	float s = step(shadowCoordXYZ.z, (shadowSample + 0.0025)) * 0.8;
 
 	colorOut.rgb *= (0.2 + s);
