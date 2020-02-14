@@ -620,13 +620,13 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	// 05-bloom programs: 
 	// ****TO-DO: 
 	//	-> 2.1b: setup bright pass program
-	/*
+	
 	// texturing with bright-pass or tone-mapping
 	currentDemoProg = demoState->prog_drawTexture_brightPass;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-bright");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_brightPass_fs->shader);
-	*/
+	
 	// ****TO-DO: 
 	//	-> 3.1a: setup Gaussian blur program
 	/*
@@ -873,24 +873,26 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 
 		// ****TO-DO: 
 		//	-> 2.1c: set up half-size framebuffers
-		/*
+		
 		//	-> post-processing, color only
 		fbo = demoState->fbo_post_c16_2fr + i;
-		???
-		???
-		???
-		*/
+		a3framebufferCreate(fbo, "fbo:post",
+			targets_post, colorType_post, a3fbo_depthDisable,
+			frameWidth2, frameHeight2);
+		
+
+
+
 		// ****TO-DO: 
 		//	-> 4.1b: set up smaller framebuffers
 		/*
 		fbo = demoState->fbo_post_c16_4fr + i;
-		???
-		???
-		???
+		//???
+
 		fbo = demoState->fbo_post_c16_8fr + i;
-		???
-		???
-		???
+		//???
+		//???
+		//???
 		*/
 	}
 

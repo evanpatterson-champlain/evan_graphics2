@@ -254,7 +254,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		// ****TO-DO: 
 		//	-> 2.1d: uncomment half-size framebuffers
 		//	-> 4.1c: add smaller framebuffers for writing additional passes (6 lines)
-		/*
+		
 		demoState->fbo_post_c16_2fr + 0,
 		demoState->fbo_post_c16_2fr + 1,
 		demoState->fbo_post_c16_2fr + 2,
@@ -264,7 +264,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 
 
-		*/
+		
 		demoState->fbo_composite_c16 + 0,
 	};
 
