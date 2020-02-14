@@ -104,10 +104,13 @@ void main()
 	
 	colorOut = vec4(max((colDiffuse * tex_out) + (colSpecular * tex_out_s), 0.0), 1.0);
 	
-	float shadowSample = texture2D(uTex_shadow, shadowCoord.xy).r;
+
+	vec3 shadowCoordXYZ = shadowCoord.xyz / shadowCoord.w;
+
+	float shadowSample = texture2D(uTex_shadow, shadowCoordXYZ.xy).r;
 
 
-	float s = step(shadowCoord.z,(shadowSample + 0.0025)) * 0.8;
+	float s = step(shadowCoordXYZ.z, (shadowSample + 0.0025)) * 0.8;
 
 	colorOut.rgb *= (0.2 + s);
 
