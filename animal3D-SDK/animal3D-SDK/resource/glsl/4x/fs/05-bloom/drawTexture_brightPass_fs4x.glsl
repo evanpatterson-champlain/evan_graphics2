@@ -33,8 +33,16 @@ uniform sampler2D uImage00;
 
 layout (location = 0) out vec4 rtFragColor;
 
+in vec4 texCoorVar;
+
+float slope = 5.0;
+float threshold = 0.7;
+
+
 void main()
 {
-	// DUMMY OUTPUT: all fragments are OPAQUE CYAN
-	rtFragColor = vec4(0.0, 1.0, 1.0, 1.0);
+	vec3 texColor = textureProj(uImage00, texCoorVar).rgb;
+	threshold = 1.0 / threshold;
+	texColor = 1.0 / (1.0 + exp(-slope * log(threshold * texColor)));
+	rtFragColor = vec4(texColor, 1.0);
 }
