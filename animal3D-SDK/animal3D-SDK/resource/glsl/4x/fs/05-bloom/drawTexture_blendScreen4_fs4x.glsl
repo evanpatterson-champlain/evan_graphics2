@@ -31,11 +31,36 @@
 //	3) use screen function to sample input textures
 
 uniform sampler2D uImage00;
+uniform sampler2D uImage01;
+uniform sampler2D uImage02;
+uniform sampler2D uImage03;
 
 layout (location = 0) out vec4 rtFragColor;
 
+in vec4 texCoorVar;
+
+
+const int numbOfInputs = 4;
+
+
+vec3 BlendBright(vec3 vec[numbOfInputs]){
+	vec3 total = vec3(1.0);
+	for(int i = 0; i < numbOfInputs; i++){
+		total *= (vec3(1.0) - vec[i]);
+	}
+	return (vec3(1.0) - total);
+}
+
+
 void main()
 {
-	// DUMMY OUTPUT: all fragments are OPAQUE YELLOW
-	rtFragColor = vec4(1.0, 1.0, 0.0, 1.0);
+	
+	vec3 sourceImages[numbOfInputs];
+	sourceImages[0] = textureProj(uImage00, texCoorVar).rgb;
+	sourceImages[1] = textureProj(uImage01, texCoorVar).rgb;
+	sourceImages[2] = textureProj(uImage02, texCoorVar).rgb;
+	sourceImages[3] = textureProj(uImage03, texCoorVar).rgb;
+
+
+	rtFragColor = vec4(BlendBright(sourceImages), 1.0);
 }
