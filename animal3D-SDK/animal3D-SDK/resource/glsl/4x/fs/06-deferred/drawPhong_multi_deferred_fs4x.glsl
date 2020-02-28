@@ -38,7 +38,6 @@
 //			-> normal calculated by expanding range of normal sample
 //			-> surface texture coordinate is used as-is once sampled
 
-in vec4 vTexcoord;
 
 layout (location = 0) out vec4 rtFragColor;
 layout (location = 4) out vec4 rtDiffuseMapSample;
@@ -46,9 +45,10 @@ layout (location = 5) out vec4 rtSpecularMapSample;
 layout (location = 6) out vec4 rtDiffuseLightTotal;
 layout (location = 7) out vec4 rtSpecularLightTotal;
 
+
+
 void main()
 {
-	// DUMMY OUTPUT: all fragments are OPAQUE CYAN (and others)
 	rtFragColor = vec4(0.0, 1.0, 1.0, 1.0);
 	rtDiffuseMapSample = vec4(0.0, 0.0, 1.0, 1.0);
 	rtSpecularMapSample = vec4(0.0, 1.0, 0.0, 1.0);
