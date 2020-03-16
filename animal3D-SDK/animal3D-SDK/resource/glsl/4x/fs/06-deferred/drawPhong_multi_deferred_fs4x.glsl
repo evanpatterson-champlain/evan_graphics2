@@ -23,7 +23,7 @@
 		data received from vertex shader.
 */
 
-#version 410
+#version 420
 
 #define MAX_LIGHTS 4
 
@@ -47,11 +47,19 @@ layout (location = 7) out vec4 rtSpecularLightTotal;
 
 
 
+in vec4 vTexcoord;
+
+uniform sampler2D uImage02;
+uniform sampler2D uImage03;
+
+
 void main()
 {
-	rtFragColor = vec4(0.0, 1.0, 1.0, 1.0);
-	rtDiffuseMapSample = vec4(0.0, 0.0, 1.0, 1.0);
-	rtSpecularMapSample = vec4(0.0, 1.0, 0.0, 1.0);
+	
+	vec3 viewNormal = textureProj(uImage02, vTexcoord).xyz;
+	rtFragColor = textureProj(uImage03, vTexcoord);
+	rtDiffuseMapSample = vec4(viewNormal, 1.0);
+	rtSpecularMapSample = vec4(1.0, 0.0, 0.0, 1.0);
 	rtDiffuseLightTotal = vec4(1.0, 0.0, 1.0, 1.0);
 	rtSpecularLightTotal = vec4(1.0, 1.0, 0.0, 1.0);
 }

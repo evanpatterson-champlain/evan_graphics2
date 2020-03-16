@@ -46,7 +46,8 @@ in vbLightingData {
 void main()
 {
 	rtViewPosition = vViewPosition;
-	rtViewNormal = normalize(vViewNormal);
+	rtViewNormal = (normalize(vViewNormal)/2.0) + 0.5;
+	//rtViewNormal = vec4(1.0, 0.0, 1.0, 1.0);
 	rtAtlasTexcoord = vTexcoord;
 	rtBiasedClipCoord = vBiasedClipCoord;
 }
