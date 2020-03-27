@@ -33,7 +33,7 @@
 #include "../a3_DemoState.h"
 
 #include "../_a3_demo_utilities/a3_DemoRenderUtils.h"
-
+#include<stdio.h>
 
 // OpenGL
 #ifdef _WIN32
@@ -89,6 +89,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Pass: Horizontal blur (1/8 frame)",
 		"Pass: Vertical blur (1/8 frame)",
 		"Pass: Bloom composite",
+		"Pass: final"
 	};
 	a3byte const* targetText_shadow[pipelines_target_shadow_max] = {
 		"Depth buffer",
@@ -114,6 +115,11 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	a3byte const* targetText_blur[pipelines_target_blur_max] = {
 		"Color target 0: FINAL DISPLAY COLOR",
 	};
+
+	a3byte const* targetText_final[pipelines_target_composite_max] = {
+		"Color target 0: FINAL DISPLAY COLOR",
+	};
+
 	a3byte const* const* targetText[pipelines_pass_max] = {
 		targetText_shadow,
 		targetText_scene,
@@ -128,6 +134,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		targetText_blur,
 		targetText_blur,
 		targetText_composite,
+		targetText_final
 	};
 
 	// text color
@@ -141,7 +148,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	a3_Demo_Pipelines_PassName const pass = demoMode->pass;
 	a3_Demo_Pipelines_TargetName const targetIndex = demoMode->targetIndex[pass];
 	a3_Demo_Pipelines_TargetName const targetCount = demoMode->targetCount[pass];
-
+	
 	// demo modes
 	a3textDraw(demoState->text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"    Pipeline (%u / %u) ('[' | ']'): %s", pipeline + 1, pipelines_pipeline_max, pipelineText[pipeline]);
@@ -268,6 +275,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->fbo_post_c16_8fr + 2,
 		
 		demoState->fbo_composite_c16 + 0,
+
+		demoState->fbo_final + 0,
 	};
 
 	// framebuffers from which to read based on pipeline mode
@@ -299,6 +308,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		// ****TO-DO: 
 		//	-> 4.1e: replace above blend pass read list with extended read list below
 		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, },
+		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, }
 	};
 
 	// target info
@@ -687,6 +697,22 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	for (i = 0, j = 4; i < j; ++i)
 		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
 	a3vertexDrawableRenderActive();
+
+
+
+
+
+	currentDemoProgram = demoState->prog_drawTexture_blendScreen4;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_passBlend;
+	currentWriteFBO = writeFBO[currentPass];
+	a3framebufferActivate(currentWriteFBO);
+	for (i = 0, j = 4; i < j; ++i)
+		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
+	a3vertexDrawableRenderActive();
+
+
 
 
 	//-------------------------------------------------------------------------

@@ -863,6 +863,13 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 		0, a3fbo_colorDisable, depthType_shadow,
 		shadowMapSz, shadowMapSz);
 
+
+	fbo = demoState->fbo_final + 0;
+	a3framebufferCreate(fbo, "fbo:final",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
+
 	for (i = 0; i < 3; ++i)
 	{
 		//	-> compositing, color only
@@ -896,6 +903,8 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 			targets_post, colorType_post, a3fbo_depthDisable,
 			frameWidth8, frameHeight8);
 		
+
+
 	}
 
 

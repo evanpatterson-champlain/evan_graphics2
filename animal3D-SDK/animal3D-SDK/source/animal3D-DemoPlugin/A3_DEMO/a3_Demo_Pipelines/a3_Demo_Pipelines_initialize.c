@@ -58,6 +58,7 @@ void a3pipelines_init(a3_DemoState const* demoState, a3_Demo_Pipelines* demoMode
 	demoMode->targetIndex[pipelines_passBlurH_8] = pipelines_blur_finalcolor;
 	demoMode->targetIndex[pipelines_passBlurV_8] = pipelines_blur_finalcolor;
 	demoMode->targetIndex[pipelines_passBlend] = pipelines_display_finalcolor;
+	demoMode->targetIndex[pipelines_final_pass] = 0;
 
 	demoMode->targetCount[pipelines_passShadow] = pipelines_target_shadow_max;
 	demoMode->targetCount[pipelines_passScene] = pipelines_target_scene_max;
@@ -72,6 +73,7 @@ void a3pipelines_init(a3_DemoState const* demoState, a3_Demo_Pipelines* demoMode
 	demoMode->targetCount[pipelines_passBlurH_8] = pipelines_target_blur_max;
 	demoMode->targetCount[pipelines_passBlurV_8] = pipelines_target_blur_max;
 	demoMode->targetCount[pipelines_passBlend] = pipelines_target_display_max;
+	demoMode->targetCount[pipelines_final_pass] = pipelines_target_display_max;
 }
 
 
