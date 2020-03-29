@@ -450,6 +450,9 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 				drawTexture_brightPass_fs[1],
 				drawTexture_blurGaussian_fs[1],
 				drawTexture_blendScreen4_fs[1];
+			a3_DemoStateShader 
+				drawTexture_processLine_fs[1],
+				drawTexture_finalBlend_fs[1];
 		};
 	} shaderList = {
 		{
@@ -493,6 +496,8 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-tex-bright",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_brightPass_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blur",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blurGaussian_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blend4",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blendScreen4_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_processLine_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-fin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_finalBlend_fs4x.glsl" } } },
 		}
 	};
 	a3_DemoStateShader *const shaderListPtr = (a3_DemoStateShader *)(&shaderList), *shaderPtr;
@@ -644,7 +649,19 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-blend4");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blendScreen4_fs->shader);
+
+
+	currentDemoProg = demoState->prog_drawTexture_processLine;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-line");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_processLine_fs->shader);
 	
+
+	currentDemoProg = demoState->prog_drawTexture_finalBlend;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-final");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_finalBlend_fs->shader);
+
 
 
 	// activate a primitive for validation
@@ -864,7 +881,12 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 		shadowMapSz, shadowMapSz);
 
 
-	fbo = demoState->fbo_final + 0;
+	fbo = demoState->fbo_processLine + 0;
+	a3framebufferCreate(fbo, "fbo:line",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
+	fbo = demoState->fbo_finalBlend + 0;
 	a3framebufferCreate(fbo, "fbo:final",
 		targets_composite, colorType_composite, a3fbo_depthDisable,
 		frameWidth1, frameHeight1);

@@ -89,6 +89,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Pass: Horizontal blur (1/8 frame)",
 		"Pass: Vertical blur (1/8 frame)",
 		"Pass: Bloom composite",
+		"Pass: Lines",
 		"Pass: final"
 	};
 	a3byte const* targetText_shadow[pipelines_target_shadow_max] = {
@@ -116,6 +117,10 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Color target 0: FINAL DISPLAY COLOR",
 	};
 
+	a3byte const* targetText_lines[pipelines_target_composite_max] = {
+		"Color target 0: FINAL DISPLAY COLOR",
+	};
+
 	a3byte const* targetText_final[pipelines_target_composite_max] = {
 		"Color target 0: FINAL DISPLAY COLOR",
 	};
@@ -134,6 +139,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		targetText_blur,
 		targetText_blur,
 		targetText_composite,
+		targetText_lines,
 		targetText_final
 	};
 
@@ -276,7 +282,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		
 		demoState->fbo_composite_c16 + 0,
 
-		demoState->fbo_final + 0,
+		demoState->fbo_processLine + 0,
 	};
 
 	// framebuffers from which to read based on pipeline mode
@@ -308,7 +314,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		// ****TO-DO: 
 		//	-> 4.1e: replace above blend pass read list with extended read list below
 		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, },
-		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, }
+		{ demoState->fbo_composite_c16 + 2, 0, },
+		{ demoState->fbo_composite_c16 + 2, 0, }
 	};
 
 	// target info
@@ -699,19 +706,40 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3vertexDrawableRenderActive();
 
 
+	
 
 
 
-	currentDemoProgram = demoState->prog_drawTexture_blendScreen4;
+
+	
+	currentDemoProgram = demoState->prog_drawTexture_processLine;
 	a3shaderProgramActivate(currentDemoProgram->program);
 
-	currentPass = pipelines_passBlend;
+	currentPass = pipelines_processLine;
 	currentWriteFBO = writeFBO[currentPass];
 	a3framebufferActivate(currentWriteFBO);
-	for (i = 0, j = 4; i < j; ++i)
+	for (i = 0, j = 1; i < j; ++i)
 		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
 	a3vertexDrawableRenderActive();
+	
 
+
+
+
+
+
+
+
+	currentDemoProgram = demoState->prog_drawTexture_finalBlend;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_finalBlend;
+	currentWriteFBO = writeFBO[currentPass];
+	a3framebufferActivate(currentWriteFBO);
+	for (i = 0, j = 1; i < j; ++i)
+		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
+	a3vertexDrawableRenderActive();
+	
 
 
 
@@ -752,6 +780,12 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	case pipelines_passBlurH_8:
 	case pipelines_passBlurV_8:
 	case pipelines_passBlend:
+		//a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
+		break;
+	case pipelines_processLine:
+		//a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
+		break;
+	case pipelines_finalBlend:
 		a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
 		break;
 	}

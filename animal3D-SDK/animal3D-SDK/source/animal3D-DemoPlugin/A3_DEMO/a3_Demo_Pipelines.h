@@ -106,7 +106,9 @@ extern "C"
 		pipelines_passBlurV_8,			// horizontal blur for bloom (eighth screen size)
 		pipelines_passBlend,			// bloom composite pass
 
-		pipelines_final_pass,
+		pipelines_processLine,
+
+		pipelines_finalBlend,
 
 		pipelines_pass_max
 	};

@@ -100,11 +100,11 @@ extern "C"
 		demoStateMaxCount_vertexArray = 8,
 		demoStateMaxCount_drawable = 16,
 		
-		demoStateMaxCount_shaderProgram = 32,
+		demoStateMaxCount_shaderProgram = 16,
 		
 		demoStateMaxCount_texture = 16,
 
-		demoStateMaxCount_framebuffer = 16,
+		demoStateMaxCount_framebuffer = 32,
 	};
 
 	
@@ -308,7 +308,10 @@ extern "C"
 				a3_DemoStateShaderProgram
 					prog_drawTexture_brightPass[1],				// draw texture with bright-pass or tone-mapping
 					prog_drawTexture_blurGaussian[1],			// draw texture with Gaussian blurring
-					prog_drawTexture_blendScreen4[1];			// draw texture with 4-layer screen blend
+					prog_drawTexture_blendScreen4[1];
+				a3_DemoStateShaderProgram
+					prog_drawTexture_processLine[1],
+					prog_drawTexture_finalBlend[1];
 			};
 		};
 
@@ -350,7 +353,9 @@ extern "C"
 
 					fbo_composite_c16[3],						// framebuffers for composition
 
-					fbo_final[1];
+					fbo_processLine[1],
+
+					fbo_finalBlend[1];
 			};
 		};
 
