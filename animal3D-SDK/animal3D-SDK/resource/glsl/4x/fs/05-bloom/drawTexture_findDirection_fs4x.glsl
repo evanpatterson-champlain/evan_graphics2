@@ -35,18 +35,21 @@ void main()
 			}
 		}
 
-		vec2 col = vec2(0.0);
+		vec2 direction = vec2(0.0);
 		for(int i = 0; i < matrixDimension; i++) {
 			for(int j = 0; j < matrixDimension; j++) {
 				matrixIndex = (i * matrixDimension) + j;
 				if(texture(uImage00, texCoorVar.xy + localLines[matrixIndex]).r == 0.0){
-					col += vec2((i - middleValue), (j - middleValue));
+					direction += vec2((i - middleValue), (j - middleValue));
 				}
 
 			}
 		}
+
+		direction /= 36.0;
 		
-		rtFragColor = vec4(col, 0.0, 1.0);
+		rtFragColor = vec4(0.0, (direction + 1.0) / 2.0, 1.0);
+
 	}
 	else{
 		rtFragColor = vec4(1.0);
