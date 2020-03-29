@@ -100,7 +100,7 @@ extern "C"
 		demoStateMaxCount_vertexArray = 8,
 		demoStateMaxCount_drawable = 16,
 		
-		demoStateMaxCount_shaderProgram = 16,
+		demoStateMaxCount_shaderProgram = 32,
 		
 		demoStateMaxCount_texture = 16,
 
@@ -311,6 +311,8 @@ extern "C"
 					prog_drawTexture_blendScreen4[1];
 				a3_DemoStateShaderProgram
 					prog_drawTexture_processLine[1],
+					prog_drawTexture_findDirection[1],
+					prog_drawTexture_distortLine[1],
 					prog_drawTexture_finalBlend[1];
 			};
 		};
@@ -353,7 +355,13 @@ extern "C"
 
 					fbo_composite_c16[3],						// framebuffers for composition
 
+
+					// my stuff
 					fbo_processLine[1],
+
+					fbo_findDirection[1],
+
+					fbo_distortLine[1],
 
 					fbo_finalBlend[1];
 			};

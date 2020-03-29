@@ -90,7 +90,9 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Pass: Vertical blur (1/8 frame)",
 		"Pass: Bloom composite",
 		"Pass: Lines",
-		"Pass: final"
+		"Pass: Find Direction",
+		"Pass: Distort Line",
+		"Pass: Final"
 	};
 	a3byte const* targetText_shadow[pipelines_target_shadow_max] = {
 		"Depth buffer",
@@ -139,6 +141,8 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		targetText_blur,
 		targetText_blur,
 		targetText_composite,
+		targetText_lines,
+		targetText_lines,
 		targetText_lines,
 		targetText_final
 	};
@@ -267,7 +271,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		// ****TO-DO: 
 		//	-> 2.1d: uncomment half-size framebuffers
 		//	-> 4.1c: add smaller framebuffers for writing additional passes (6 lines)
-		
+
 		demoState->fbo_post_c16_2fr + 0,
 		demoState->fbo_post_c16_2fr + 1,
 		demoState->fbo_post_c16_2fr + 2,
@@ -279,10 +283,14 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->fbo_post_c16_8fr + 0,
 		demoState->fbo_post_c16_8fr + 1,
 		demoState->fbo_post_c16_8fr + 2,
-		
+
 		demoState->fbo_composite_c16 + 0,
 
+
 		demoState->fbo_processLine + 0,
+		demoState->fbo_findDirection + 0,
+		demoState->fbo_distortLine + 0,
+		demoState->fbo_finalBlend + 0
 	};
 
 	// framebuffers from which to read based on pipeline mode
@@ -315,7 +323,9 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		//	-> 4.1e: replace above blend pass read list with extended read list below
 		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, },
 		{ demoState->fbo_composite_c16 + 2, 0, },
-		{ demoState->fbo_composite_c16 + 2, 0, }
+		{ demoState->fbo_composite_c16 + 2, 0, },
+		{ demoState->fbo_composite_c16 + 2, 0, },
+		{ demoState->fbo_composite_c16 + 0, 0, }
 	};
 
 	// target info
@@ -717,14 +727,35 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 	currentPass = pipelines_processLine;
 	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
-	for (i = 0, j = 1; i < j; ++i)
-		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
+
 	a3vertexDrawableRenderActive();
 	
 
 
 
+	currentDemoProgram = demoState->prog_drawTexture_findDirection;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_findDirection;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+
+	a3vertexDrawableRenderActive();
+
+
+
+	currentDemoProgram = demoState->prog_drawTexture_distortLine;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_distortLine;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+
+	a3vertexDrawableRenderActive();
 
 
 
@@ -735,9 +766,9 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 	currentPass = pipelines_finalBlend;
 	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
-	for (i = 0, j = 1; i < j; ++i)
-		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3vertexDrawableRenderActive();
 	
 
@@ -780,11 +811,9 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	case pipelines_passBlurH_8:
 	case pipelines_passBlurV_8:
 	case pipelines_passBlend:
-		//a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
-		break;
 	case pipelines_processLine:
-		//a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
-		break;
+	case pipelines_findDirection:
+	case pipelines_distortLine:
 	case pipelines_finalBlend:
 		a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
 		break;

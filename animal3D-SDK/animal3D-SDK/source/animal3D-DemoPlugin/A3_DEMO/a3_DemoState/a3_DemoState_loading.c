@@ -452,6 +452,8 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 				drawTexture_blendScreen4_fs[1];
 			a3_DemoStateShader 
 				drawTexture_processLine_fs[1],
+				drawTexture_findDirection_fs[1],
+				drawTexture_distortLine_fs[1],
 				drawTexture_finalBlend_fs[1];
 		};
 	} shaderList = {
@@ -497,6 +499,8 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-tex-blur",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blurGaussian_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blend4",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blendScreen4_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_processLine_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_findDirection_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_distortLine_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-fin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_finalBlend_fs4x.glsl" } } },
 		}
 	};
@@ -655,6 +659,17 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-line");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_processLine_fs->shader);
+
+	currentDemoProg = demoState->prog_drawTexture_findDirection;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-dir");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_findDirection_fs->shader);
+
+
+	currentDemoProg = demoState->prog_drawTexture_distortLine;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-dist-line");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_distortLine_fs->shader);
 	
 
 	currentDemoProg = demoState->prog_drawTexture_finalBlend;
@@ -883,6 +898,16 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 
 	fbo = demoState->fbo_processLine + 0;
 	a3framebufferCreate(fbo, "fbo:line",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
+	fbo = demoState->fbo_findDirection + 0;
+	a3framebufferCreate(fbo, "fbo:find-dir",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
+	fbo = demoState->fbo_distortLine + 0;
+	a3framebufferCreate(fbo, "fbo:distort-line",
 		targets_composite, colorType_composite, a3fbo_depthDisable,
 		frameWidth1, frameHeight1);
 
