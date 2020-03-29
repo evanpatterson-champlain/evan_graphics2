@@ -322,10 +322,10 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		// ****TO-DO: 
 		//	-> 4.1e: replace above blend pass read list with extended read list below
 		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, },
-		{ demoState->fbo_composite_c16 + 2, 0, },
-		{ demoState->fbo_composite_c16 + 2, 0, },
-		{ demoState->fbo_composite_c16 + 2, 0, },
-		{ demoState->fbo_composite_c16 + 0, 0, }
+		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
+		{ demoState->fbo_processLine, 0, },
+		{ demoState->fbo_findDirection, 0, },
+		{ demoState->fbo_composite_c16 + 0, demoState->fbo_distortLine, }
 	};
 
 	// target info
@@ -729,7 +729,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
-
+	a3framebufferBindDepthTexture(currentReadFBO, a3tex_unit00);
 	a3vertexDrawableRenderActive();
 	
 
@@ -743,7 +743,6 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
 	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-
 	a3vertexDrawableRenderActive();
 
 
@@ -755,7 +754,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
-
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3vertexDrawableRenderActive();
 
 
@@ -767,9 +766,9 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 	currentPass = pipelines_finalBlend;
 	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	a3framebufferBindColorTexture(readFBO[currentPass][0], a3tex_unit00, 0);
+	a3framebufferBindColorTexture(readFBO[currentPass][1], a3tex_unit01, 0);
 	a3vertexDrawableRenderActive();
 	
 
