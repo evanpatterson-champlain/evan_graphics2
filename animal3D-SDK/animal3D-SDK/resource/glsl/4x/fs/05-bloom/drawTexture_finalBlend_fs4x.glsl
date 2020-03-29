@@ -16,6 +16,5 @@ void main()
 {
 	
 
-	//rtFragColor = vec4(0.0, 1.0, 1.0, 1.0);
-	rtFragColor = texture(uImage01, texCoorVar.xy).rgba;
+	rtFragColor = texture(uImage01, texCoorVar.xy);
 }
