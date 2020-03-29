@@ -356,13 +356,10 @@ extern "C"
 					fbo_composite_c16[3],						// framebuffers for composition
 
 
-					// my stuff
+					// evan stuff
 					fbo_processLine[1],
-
 					fbo_findDirection[1],
-
 					fbo_distortLine[1],
-
 					fbo_finalBlend[1];
 			};
 		};
