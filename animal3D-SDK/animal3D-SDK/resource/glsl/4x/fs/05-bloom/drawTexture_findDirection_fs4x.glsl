@@ -8,14 +8,16 @@ layout (location = 0) out vec4 rtFragColor;
 
 in vec4 texCoorVar;
 
+uniform vec2 uSize;
+
 const int matrixSize = 36;
 const int matrixDimension = 6;
 const int middleValue = matrixDimension / 2;
 
 vec2 localLines[matrixSize];
 
-float pixelSize = 1.0 / 512.0;
-
+vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
+vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
 
 void main()
 {
@@ -30,8 +32,7 @@ void main()
 		for(int i = 0; i < matrixDimension; i++) {
 			for(int j = 0; j < matrixDimension; j++) {
 				matrixIndex = (i * matrixDimension) + j;
-				localLines[matrixIndex] = pixelSize * vec2(i - middleValue, j - middleValue);
-
+				localLines[matrixIndex] = uSize * vec2(i - middleValue, j - middleValue);
 			}
 		}
 
@@ -40,16 +41,21 @@ void main()
 			for(int j = 0; j < matrixDimension; j++) {
 				matrixIndex = (i * matrixDimension) + j;
 				if(texture(uImage00, texCoorVar.xy + localLines[matrixIndex]).r == 0.0){
-					direction += vec2((i - middleValue), (j - middleValue));
+					vec2 curDirection = vec2((i - middleValue), (j - middleValue));
+					curDirection *= sign(curDirection.x);
+					direction += curDirection;
 				}
 
 			}
 		}
 
-		direction /= 36.0;
-		
-		rtFragColor = vec4(0.0, (direction + 1.0) / 2.0, 1.0);
+		direction = normalize(direction);
 
+		// distance and direction are passed on
+		float absDistance = (cos((texCoorVar.x + texCoorVar.y) * 3.14159 * 50.0) + 1.0)/3.0;
+		//float absDistance = 0.5;
+
+		rtFragColor = vec4(0.0, direction * absDistance, 1.0);
 	}
 	else{
 		rtFragColor = vec4(1.0);

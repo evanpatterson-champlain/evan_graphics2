@@ -726,6 +726,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3shaderProgramActivate(currentDemoProgram->program);
 
 	currentPass = pipelines_processLine;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
@@ -739,6 +741,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3shaderProgramActivate(currentDemoProgram->program);
 
 	currentPass = pipelines_findDirection;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
@@ -747,10 +751,13 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 
 
+
+
 	currentDemoProgram = demoState->prog_drawTexture_distortLine;
 	a3shaderProgramActivate(currentDemoProgram->program);
-
 	currentPass = pipelines_distortLine;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
@@ -763,7 +770,6 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 	currentDemoProgram = demoState->prog_drawTexture_finalBlend;
 	a3shaderProgramActivate(currentDemoProgram->program);
-
 	currentPass = pipelines_finalBlend;
 	currentWriteFBO = writeFBO[currentPass];
 	a3framebufferActivate(currentWriteFBO);

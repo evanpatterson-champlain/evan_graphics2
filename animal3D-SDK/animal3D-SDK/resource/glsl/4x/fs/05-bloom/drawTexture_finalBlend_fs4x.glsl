@@ -15,6 +15,10 @@ in vec4 texCoorVar;
 void main()
 {
 	
+	vec4 v1 = texture(uImage00, texCoorVar.xy);
+	vec4 v2 = texture(uImage01, texCoorVar.xy);
 
-	rtFragColor = texture(uImage01, texCoorVar.xy);
+	vec4 colorOut = v1 * v2.x;
+
+	rtFragColor = colorOut;
 }
