@@ -562,11 +562,6 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-tex-outline",			a3shader_fragment,	1,{ A3_DEMO_FS"04-multipass/drawTexture_outline_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-Phong-multi-shadow",	a3shader_fragment,	1,{ A3_DEMO_FS"04-multipass/drawPhong_multi_shadow_mrt_fs4x.glsl" } } },
 			// 05-bloom
-<<<<<<< HEAD
-			{ { { 0 },	"shdr-fs:draw-tex-bright",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_brightPass_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex-blur",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blurGaussian_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex-blend4",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blendScreen4_fs4x.glsl" } } },
-=======
 			{ { { 0 },	"shdr-fs:draw-tex-bright",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/e/drawTexture_brightPass_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blur",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/e/drawTexture_blurGaussian_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blend4",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/e/drawTexture_blendScreen4_fs4x.glsl" } } },
@@ -577,7 +572,6 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-Phong-composite",		a3shader_fragment,	1,{ A3_DEMO_FS"06-deferred/e/drawPhongComposite_fs4x.glsl" } } },
 			// 07-curves
 			{ { { 0 },	"shdr-fs:draw-Phong-mul-fwd-mrt",	a3shader_fragment,	1,{ A3_DEMO_FS"07-curves/drawPhong_multi_forward_mrt_fs4x.glsl" } } },
->>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 		}
 	};
 	a3_DemoStateShader *const shaderListPtr = (a3_DemoStateShader *)(&shaderList), *shaderPtr;
@@ -703,44 +697,24 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_outline_fs->shader);
 
 	// 05-bloom programs: 
-<<<<<<< HEAD
-	// ****TO-DO: 
-	//	-> 2.1b: setup bright pass program
-	
-=======
->>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 	// texturing with bright-pass or tone-mapping
 	currentDemoProg = demoState->prog_drawTexture_brightPass;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-bright");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_brightPass_fs->shader);
-<<<<<<< HEAD
-	
-	// ****TO-DO: 
-	//	-> 3.1a: setup Gaussian blur program
-	
-=======
->>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
+
 	// texturing with Gaussian blurring
 	currentDemoProg = demoState->prog_drawTexture_blurGaussian;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-blur");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blurGaussian_fs->shader);
-<<<<<<< HEAD
-	
-	// ****TO-DO: 
-	//	-> 4.1a: setup screen blending program
-	
-=======
->>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
+
 	// texturing with bloom composition
 	currentDemoProg = demoState->prog_drawTexture_blendScreen4;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-blend4");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blendScreen4_fs->shader);
-<<<<<<< HEAD
-	
-=======
+
 
 	// 06-deferred programs: 
 	// draw lighting data as g-buffers
@@ -800,7 +774,7 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-color-hierarchy-inst");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passColor_hierarchy_transform_instanced_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawColorAttrib_fs->shader);
->>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
+
 
 
 	// activate a primitive for validation
@@ -1083,34 +1057,7 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 		a3framebufferCreate(fbo, "fbo:composite",
 			targets_composite, colorType_composite, a3fbo_depthDisable,
 			frameWidth1, frameHeight1);
-<<<<<<< HEAD
 
-		// ****TO-DO: 
-		//	-> 2.1c: set up half-size framebuffers
-		
-		//	-> post-processing, color only
-		fbo = demoState->fbo_post_c16_2fr + i;
-		a3framebufferCreate(fbo, "fbo:post",
-			targets_post, colorType_post, a3fbo_depthDisable,
-			frameWidth2, frameHeight2);
-		
-
-
-
-		// ****TO-DO: 
-		//	-> 4.1b: set up smaller framebuffers
-		
-		fbo = demoState->fbo_post_c16_4fr + i;
-		a3framebufferCreate(fbo, "fbo:post4",
-			targets_post, colorType_post, a3fbo_depthDisable,
-			frameWidth4, frameHeight4);
-
-		fbo = demoState->fbo_post_c16_8fr + i;
-		a3framebufferCreate(fbo, "fbo:post8",
-			targets_post, colorType_post, a3fbo_depthDisable,
-			frameWidth8, frameHeight8);
-		
-=======
 		
 		//	-> post-processing, color only
 		fbo = demoState->fbo_post_c16_2fr + i;
@@ -1125,7 +1072,6 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 		a3framebufferCreate(fbo, "fbo:post-eighth",
 			targets_post, colorType_post, a3fbo_depthDisable,
 			frameWidth8, frameHeight8);
->>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 	}
 
 
