@@ -70,8 +70,10 @@ extern "C"
 				uMV,						// model-view matrix (object -> view)
 				uP,							// projection matrix (view -> clip)
 				uP_inv,						// projection matrix inverse (clip -> view)
+				uPB,						// projection-bias matrix (view -> biased clip)
+				uPB_inv,					// projection-bias inverse matrix (biased clip -> view)
 				uMV_nrm,					// model-view matrix for normals (object -> view)
-				uMVPB,						// model-view-projection-bias transform (object -> bias clip)
+				uMVPB,						// model-view-projection-bias transform (object -> biased clip)
 				uMVPB_other,				// model-view-projection-bias transform to other (object -> bias clip other)
 				uAtlas;						// atlas matrix for texture coordinates
 
@@ -94,6 +96,9 @@ extern "C"
 
 			a3i32
 				// common general uniform handles
+				uIndex,						// generic index
+				uCount,						// generic count
+				uFlag,						// generic flag
 				uAxis,						// generic axis
 				uSize,						// generic size
 				uTime;						// time
@@ -103,11 +108,18 @@ extern "C"
 		struct {
 			a3i32
 				// transformation uniform block handles
+				ubTransformStack,	// matrix stack block
+				ubTransformMVPB,	// model-view-projection-bias matrix block
 				ubTransformMVP;		// model-view-projection matrix block
 
 			a3i32
 				// lighting uniform block handles
 				ubPointLight;		// point light structure block
+
+			a3i32
+				// animation uniform block handles
+				ubHierarchy,		// hierarchical information
+				ubCurveWaypoint;	// waypoints for interpolation
 		};
 	};
 

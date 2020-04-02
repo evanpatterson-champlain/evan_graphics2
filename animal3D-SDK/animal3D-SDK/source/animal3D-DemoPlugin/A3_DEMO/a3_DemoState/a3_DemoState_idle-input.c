@@ -127,6 +127,9 @@ void a3demo_input(a3_DemoState *demoState, a3f64 dt)
 	case demoState_pipelines:
 		demoState->activeCamera = demoState->demoMode_pipelines->activeCamera;
 		break;
+	case demoState_keyframes:
+		demoState->activeCamera = demoState->demoMode_keyframes->activeCamera;
+		break;
 	}
 }
 
@@ -137,6 +140,8 @@ void a3demo_input(a3_DemoState *demoState, a3f64 dt)
 // demo mode callbacks
 void a3shadingCB_input_keyCharPress(a3_DemoState const* demoState, a3_Demo_Shading* demoMode, a3i32 asciiKey);
 void a3pipelinesCB_input_keyCharPress(a3_DemoState const* demoState, a3_Demo_Pipelines* demoMode, a3i32 asciiKey);
+void a3keyframesCB_input_keyCharPress(a3_DemoState const* demoState, a3_Demo_Keyframes* demoMode, a3i32 asciiKey);
+void a3keyframesCB_input_keyCharHold(a3_DemoState const* demoState, a3_Demo_Keyframes* demoMode, a3i32 asciiKey);
 
 // ascii key callback
 void a3demoCB_input_keyCharPress(a3_DemoState* demoState, a3i32 asciiKey)
@@ -150,6 +155,7 @@ void a3demoCB_input_keyCharPress(a3_DemoState* demoState, a3i32 asciiKey)
 
 		// increase/decrease light count
 		a3demoCtrlCasesCap(demoState->forwardLightCount, demoStateMaxCount_lightObject, 0, 'L', 'l');
+		a3demoCtrlCasesCap(demoState->deferredLightCount, demoStateMaxCount_lightVolume, 0, ':', ';');
 
 
 		// toggle grid
@@ -173,6 +179,9 @@ void a3demoCB_input_keyCharPress(a3_DemoState* demoState, a3i32 asciiKey)
 		// toggle tangent bases on vertices or other
 		a3demoCtrlCaseToggle(demoState->displayTangentBases, 'B');
 
+		// toggle wireframe overlay
+		a3demoCtrlCaseToggle(demoState->displayWireframe, 'F');
+
 		// update animation
 		a3demoCtrlCaseToggle(demoState->updateAnimation, 'm');
 
@@ -192,6 +201,34 @@ void a3demoCB_input_keyCharPress(a3_DemoState* demoState, a3i32 asciiKey)
 		break;
 	case demoState_pipelines:
 		a3pipelinesCB_input_keyCharPress(demoState, demoState->demoMode_pipelines, asciiKey);
+		break;
+	case demoState_keyframes:
+		// press and hold
+		a3keyframesCB_input_keyCharPress(demoState, demoState->demoMode_keyframes, asciiKey);
+		a3keyframesCB_input_keyCharHold(demoState, demoState->demoMode_keyframes, asciiKey);
+		break;
+	}
+}
+
+// ascii key hold callback
+void a3demoCB_input_keyCharHold(a3_DemoState* demoState, a3i32 asciiKey)
+{
+	switch (asciiKey)
+	{
+		// increase/decrease light count
+		a3demoCtrlCasesCap(demoState->deferredLightCount, demoStateMaxCount_lightVolume, 0, ':', ';');
+	}
+
+
+	// callback for current mode
+	switch (demoState->demoMode)
+	{
+	case demoState_shading:
+		break;
+	case demoState_pipelines:
+		break;
+	case demoState_keyframes:
+		a3keyframesCB_input_keyCharHold(demoState, demoState->demoMode_keyframes, asciiKey);
 		break;
 	}
 }

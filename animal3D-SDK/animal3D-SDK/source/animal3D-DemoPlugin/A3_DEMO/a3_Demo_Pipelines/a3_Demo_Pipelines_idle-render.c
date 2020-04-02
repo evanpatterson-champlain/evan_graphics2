@@ -18,11 +18,11 @@
 	animal3D SDK: Minimal 3D Animation Framework
 	By Daniel S. Buckstein
 
-	a3_Demopipelines_idle-render.c
-	Demo mode implementations: shading rendering.
+	a3_Demo_Pipelines_idle-render.c
+	Demo mode implementations: pipelines rendering.
 
 	********************************************
-	*** RENDERING CODE FOR SHADING DEMO MODE ***
+	*** RENDERING FOR PIPELINES DEMO MODE    ***
 	********************************************
 */
 
@@ -54,6 +54,8 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	// display mode info
 	a3byte const* pipelineText[pipelines_pipeline_max] = {
 		"Forward rendering",
+		"Deferred shading",
+		"Deferred lighting",
 	};
 
 	// forward pipeline names
@@ -78,6 +80,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	a3byte const* passName[pipelines_pass_max] = {
 		"Pass: Capture shadow map",
 		"Pass: Render scene objects",
+		"Pass: Render light volumes",
 		"Pass: Composite scene",
 		"Pass: Bright pass (1/2 frame)",
 		"Pass: Horizontal blur (1/2 frame)",
@@ -98,14 +101,21 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Color target 1: Attrib data: view position",
 		"Color target 2: Attrib data: view normal",
 		"Color target 3: Attrib data: atlas texcoord",
-		"Color target 4: Shadow coord or diffuse map",
-		"Color target 5: Shadow test or specular map",
+		"Color target 4: Shading: diffuse sample (or shadow coord)",
+		"Color target 5: Shading: specular sample (or shadow test)",
 		"Color target 6: Lighting: diffuse total",
 		"Color target 7: Lighting: specular total",
 		"Depth buffer",
 	};
 	a3byte const* targetText_composite[pipelines_target_composite_max] = {
 		"Color target 0: FINAL DISPLAY COLOR",
+		"Color target 1: Attrib data: view position",
+		"Color target 2: Attrib data: view normal",
+		"Color target 3: Attrib data: atlas texcoord",
+		"Color target 4: Shading: diffuse sample",
+		"Color target 5: Shading: specular sample",
+		"Color target 6: Lighting: diffuse total",
+		"Color target 7: Lighting: specular total",
 	};
 	a3byte const* targetText_bright[pipelines_target_bright_max] = {
 		"Color target 0: FINAL DISPLAY COLOR",
@@ -117,6 +127,7 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	a3byte const* const* targetText[pipelines_pass_max] = {
 		targetText_shadow,
 		targetText_scene,
+		targetText_composite,
 		targetText_composite,
 		targetText_bright,
 		targetText_blur,
@@ -230,27 +241,42 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->tex_checker,
 	};
 
+	// temp texture atlas matrix pointers
+	const a3mat4* atlas[] = {
+		demoState->atlas_stone,
+		demoState->atlas_earth,
+		demoState->atlas_stone,
+		demoState->atlas_mars,
+		demoState->atlas_checker,
+	};
+
 	// forward pipeline shader programs
 	const a3_DemoStateShaderProgram* renderProgram[pipelines_pipeline_max][pipelines_render_max] = {
 		{
 			demoState->prog_drawPhong_multi_mrt,
 			demoState->prog_drawPhong_multi_shadow_mrt,
+		}, {
+			demoState->prog_drawLightingData,
+			demoState->prog_drawLightingData,
+		}, {
+			demoState->prog_drawLightingData,
+			demoState->prog_drawLightingData,
 		},
 	};
 
 	// display shader programs
-	const a3_DemoStateShaderProgram* displayProgram[pipelines_pipeline_max][pipelines_display_max] = {
-		{
-			demoState->prog_drawTexture,
-			demoState->prog_drawTexture_outline,
-		},
+	const a3_DemoStateShaderProgram* displayProgram[pipelines_display_max] = {
+		demoState->prog_drawTexture,
+		demoState->prog_drawTexture_outline,
 	};
 
 	// framebuffers to which to write based on pipeline mode
 	const a3_Framebuffer* writeFBO[pipelines_pass_max] = {
 		demoState->fbo_shadow_d32,
 		demoState->fbo_scene_c16d24s8_mrt,
+		demoState->fbo_composite_c16 + 1,
 		demoState->fbo_composite_c16 + 2,
+<<<<<<< HEAD
 		// ****TO-DO: 
 		//	-> 2.1d: uncomment half-size framebuffers
 		//	-> 4.1c: add smaller framebuffers for writing additional passes (6 lines)
@@ -267,6 +293,17 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->fbo_post_c16_8fr + 1,
 		demoState->fbo_post_c16_8fr + 2,
 		
+=======
+		demoState->fbo_post_c16_2fr + 0,
+		demoState->fbo_post_c16_2fr + 1,
+		demoState->fbo_post_c16_2fr + 2,
+		demoState->fbo_post_c16_4fr + 0,
+		demoState->fbo_post_c16_4fr + 1,
+		demoState->fbo_post_c16_4fr + 2,
+		demoState->fbo_post_c16_8fr + 0,
+		demoState->fbo_post_c16_8fr + 1,
+		demoState->fbo_post_c16_8fr + 2,
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 		demoState->fbo_composite_c16 + 0,
 	};
 
@@ -275,7 +312,9 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		{ 0, },
 		{ 0, demoState->fbo_shadow_d32, 0, },
 		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
+		{ demoState->fbo_scene_c16d24s8_mrt, demoState->fbo_composite_c16 + 1, 0, },
 		{ demoState->fbo_composite_c16 + 2, 0, },
+<<<<<<< HEAD
 		// ****TO-DO: 
 		//	-> 2.1e: uncomment half-size framebuffers
 		//	-> 4.1d: add smaller framebuffers for reading additional passes (6 lines)
@@ -298,6 +337,16 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	//	{ demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, 0, 0, },
 		// ****TO-DO: 
 		//	-> 4.1e: replace above blend pass read list with extended read list below
+=======
+		{ demoState->fbo_post_c16_2fr + 0, 0, },
+		{ demoState->fbo_post_c16_2fr + 1, 0, },
+		{ demoState->fbo_post_c16_2fr + 2, 0, },
+		{ demoState->fbo_post_c16_4fr + 0, 0, },
+		{ demoState->fbo_post_c16_4fr + 1, 0, },
+		{ demoState->fbo_post_c16_4fr + 2, 0, },
+		{ demoState->fbo_post_c16_8fr + 0, 0, },
+		{ demoState->fbo_post_c16_8fr + 1, 0, },
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, },
 	};
 
@@ -318,8 +367,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 	// pixel size and effect axis
 	a3vec2 pixelSize = a3vec2_one;
-	a3vec2 sampleAxisH = a3vec2_x;
-	a3vec2 sampleAxisV = a3vec2_y;
+	a3vec2 sampleAxisH = { +a3real_one, +a3real_one };// a3vec2_x;
+	a3vec2 sampleAxisV = { +a3real_one, -a3real_one };// a3vec2_y;
 
 
 	// bias matrix
@@ -329,6 +378,12 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		0.0f, 0.0f, 0.5f, 0.0f,
 		0.5f, 0.5f, 0.5f, 1.0f,
 	};
+	const a3mat4 unbias = {
+		 2.0f,  0.0f,  0.0f, 0.0f,
+		 0.0f,  2.0f,  0.0f, 0.0f,
+		 0.0f,  0.0f,  2.0f, 0.0f,
+		-1.0f, -1.0f, -1.0f, 1.0f,
+	};
 
 	// final model matrix and full matrix stack
 	a3mat4 viewMat = activeCameraObject->modelMatInv;
@@ -336,11 +391,17 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3mat4 modelViewProjectionMat = viewProjectionMat;
 	a3mat4 modelViewMat = a3mat4_identity, modelMat = a3mat4_identity;
 	a3mat4 modelViewProjectionBiasMat_other, viewProjectionBiasMat_other = activeShadowCaster->viewProjectionMat;
+	a3mat4 projectionBiasMat = activeCamera->projectionMat, projectionBiasMat_inv = activeCamera->projectionMatInv;
 
 
 	// init
 	a3real4x4ConcatR(bias.m, viewProjectionBiasMat_other.m);
 	modelViewProjectionBiasMat_other = viewProjectionBiasMat_other;
+
+	//a3real4x4ConcatR(bias.m, projectionBiasMat.m);
+	//a3real4x4ConcatL(projectionBiasMat_inv.m, unbias.m);
+	a3real4x4Product(projectionBiasMat.m, bias.m, activeCamera->projectionMat.m);
+	a3real4x4Product(projectionBiasMat_inv.m, activeCamera->projectionMatInv.m, unbias.m);
 
 
 	//-------------------------------------------------------------------------
@@ -386,6 +447,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	{
 		// shading with MRT
 	case pipelines_forward:
+	case pipelines_deferred_shading:
+	case pipelines_deferred_lighting:
 		// target scene framebuffer
 		a3demo_setSceneState(currentWriteFBO, demoState->displaySkybox);
 		break;
@@ -410,37 +473,43 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	}
 
 
+	// select program based on settings
+	currentDemoProgram = renderProgram[pipeline][render];
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	// send shared data: 
+	//	- projection matrix
+	//	- light data
+	//	- activate shared textures including atlases if using
+	//	- shared animation data
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP_inv, 1, activeCamera->projectionMatInv.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB, 1, projectionBiasMat.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB_inv, 1, projectionBiasMat_inv.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
+	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->renderTimer->totalTime);
+	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, skyblue);
+	a3textureActivate(demoState->tex_ramp_dm, a3tex_unit04);
+	a3textureActivate(demoState->tex_ramp_sm, a3tex_unit05);
+
+
 	// select pipeline algorithm
+	glDisable(GL_BLEND);
 	switch (pipeline)
 	{
-		// scene pass
+		// scene pass using forward pipeline
 	case pipelines_forward: {
-		// select program based on settings
-		currentDemoProgram = renderProgram[pipeline][render];
-		a3shaderProgramActivate(currentDemoProgram->program);
+		// activate shadow map and other relevant textures
+		currentReadFBO = demoState->fbo_shadow_d32;
+		a3framebufferBindDepthTexture(currentReadFBO, a3tex_unit06);
+		a3textureActivate(demoState->tex_earth_dm, a3tex_unit07);
 
-		// send shared data: 
-		//	- projection matrix
-		//	- light data
-		//	- activate shared textures including atlases if using
-		//	- shared animation data
-		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
-		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP_inv, 1, activeCamera->projectionMatInv.mm);
-		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
-		a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->renderTimer->totalTime);
-		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, skyblue);
+		// send more common uniforms
 		a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uLightCt, 1, &demoState->forwardLightCount);
 		a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uLightSz, demoState->forwardLightCount, lightSz);
 		a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uLightSzInvSq, demoState->forwardLightCount, lightSzInvSq);
 		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uLightPos, demoState->forwardLightCount, lightPos->v);
 		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uLightCol, demoState->forwardLightCount, lightCol->v);
-		a3textureActivate(demoState->tex_ramp_dm, a3tex_unit04);
-		a3textureActivate(demoState->tex_ramp_sm, a3tex_unit05);
-
-		// activate shadow map and other relevant textures
-		currentReadFBO = demoState->fbo_shadow_d32;
-		a3framebufferBindDepthTexture(currentReadFBO, a3tex_unit06);
-		a3textureActivate(demoState->tex_earth_dm, a3tex_unit07);
 
 		// individual object requirements: 
 		//	- modelviewprojection
@@ -457,7 +526,68 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 			a3demo_drawModelLighting_bias_other(modelViewProjectionBiasMat_other.m, modelViewProjectionMat.m, modelViewMat.m, viewProjectionBiasMat_other.m, viewProjectionMat.m, viewMat.m, currentSceneObject->modelMat.m, currentDemoProgram, drawable[k], rgba4[k + 3].v);
 		}
 	}	break;
-		// end geometry pass
+		// end forward scene pass
+
+		// scene pass using deferred shading
+	case pipelines_deferred_shading: {
+		// draw objects as-is
+		for (k = 0,
+			currentSceneObject = demoState->planeObject, endSceneObject = demoState->teapotObject;
+			currentSceneObject <= endSceneObject;
+			++k, ++currentSceneObject)
+		{
+			a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, atlas[k]->mm);
+			a3demo_drawModelLighting(modelViewProjectionMat.m, modelViewMat.m, viewProjectionMat.m, viewMat.m, currentSceneObject->modelMat.m, currentDemoProgram, drawable[k], rgba4[k + 3].v);
+		}
+	}	break;
+		// end deferred shading scene pass
+
+		// scene pass using deferred lighting
+	case pipelines_deferred_lighting: {
+		// same as above
+		for (k = 0,
+			currentSceneObject = demoState->planeObject, endSceneObject = demoState->teapotObject;
+			currentSceneObject <= endSceneObject;
+			++k, ++currentSceneObject)
+		{
+			a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, atlas[k]->mm);
+			a3demo_drawModelLighting(modelViewProjectionMat.m, modelViewMat.m, viewProjectionMat.m, viewMat.m, currentSceneObject->modelMat.m, currentDemoProgram, drawable[k], rgba4[k + 3].v);
+		}
+
+		// move on to light pre-pass
+		currentPass = pipelines_passLighting;
+		currentWriteFBO = writeFBO[currentPass];
+		a3framebufferActivate(currentWriteFBO);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// activate program and g-buffers
+		currentDemoProgram = demoState->prog_drawPhongVolume_instanced;
+		a3shaderProgramActivate(currentDemoProgram->program);
+
+		// scene (g-buffers)
+		currentReadFBO = readFBO[currentPass][0];
+		a3framebufferBindDepthTexture(currentReadFBO, a3tex_unit00);
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit01, pipelines_scene_position);
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit02, pipelines_scene_normal);
+
+		// uniforms
+		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB_inv, 1, projectionBiasMat_inv.mm);
+
+		// draw instanced light volumes
+		a3demo_enableAdditiveBlending();
+		glCullFace(GL_FRONT);
+		a3vertexDrawableActivate(demoState->draw_pointlight);
+		for (i = 0; i < demoState->deferredLightBlockCount; ++i)
+		{
+			a3shaderUniformBufferActivate(demoState->ubo_transformMVP_light + i, 0);
+			a3shaderUniformBufferActivate(demoState->ubo_transformMVPB_light + i, 1);
+			a3shaderUniformBufferActivate(demoState->ubo_pointLight + i, 4);
+			a3vertexDrawableRenderActiveInstanced(demoState->deferredLightCountPerBlock[i]);
+		}
+		glCullFace(GL_BACK);
+		glDisable(GL_BLEND);
+	}	break;
+		// end deferred lighting scene pass
 	}
 
 
@@ -480,19 +610,66 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3demo_drawModelTexturedColored_invertModel(modelViewProjectionMat.m, viewProjectionMat.m, demoState->skyboxObject->modelMat.m, a3mat4_identity.m, currentDemoProgram, demoState->draw_skybox, demoState->tex_skybox_clouds, skyblue);
 	a3demo_enableCompositeBlending();
 
-	// use simple texturing program
-	currentDemoProgram = demoState->prog_drawTexture;
-	a3shaderProgramActivate(currentDemoProgram->program);
-	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, a3mat4_identity.mm);
-	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
-
 	// draw textured quad with previous pass image on it
 	// repeat as necessary to complete composite
 	currentDrawable = demoState->draw_unitquad;
 	a3vertexDrawableActivate(currentDrawable);
 
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	switch (pipeline)
+	{
+	case pipelines_forward:
+		// use simple texturing program
+		currentDemoProgram = demoState->prog_drawTexture;
+		a3shaderProgramActivate(currentDemoProgram->program);
+		// scene (color)
+		currentReadFBO = readFBO[currentPass][0];
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+		break;
+
+	case pipelines_deferred_shading:
+		// use deferred shading program
+		currentDemoProgram = demoState->prog_drawPhong_multi_deferred;
+		a3shaderProgramActivate(currentDemoProgram->program);
+		// scene (g-buffers)
+		currentReadFBO = readFBO[currentPass][0];
+		a3framebufferBindDepthTexture(currentReadFBO, a3tex_unit00);
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit01, pipelines_scene_position);
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit02, pipelines_scene_normal);
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit03, pipelines_scene_texcoord);
+		// atlases
+		a3textureActivate(demoState->tex_atlas_dm, a3tex_unit04);
+		a3textureActivate(demoState->tex_atlas_sm, a3tex_unit05);
+		// uniforms
+		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB_inv, 1, projectionBiasMat_inv.mm);
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, skyblue);
+		a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uLightCt, 1, &demoState->forwardLightCount);
+		a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uLightSz, demoState->forwardLightCount, lightSz);
+		a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uLightSzInvSq, demoState->forwardLightCount, lightSzInvSq);
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uLightPos, demoState->forwardLightCount, lightPos->v);
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uLightCol, demoState->forwardLightCount, lightCol->v);
+		break;
+
+	case pipelines_deferred_lighting:
+		// use deferred lighting composite program
+		currentDemoProgram = demoState->prog_drawPhongComposite;
+		a3shaderProgramActivate(currentDemoProgram->program);
+		// light pre-pass (lighting totals)
+		currentReadFBO = readFBO[currentPass][1];
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit01, pipelines_composite_diffuseLight);
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit02, pipelines_composite_specularLight);
+		// scene (g-buffers)
+		currentReadFBO = readFBO[currentPass][0];
+		a3framebufferBindColorTexture(currentReadFBO, a3tex_unit03, pipelines_scene_texcoord);
+		// atlases
+		a3textureActivate(demoState->tex_atlas_dm, a3tex_unit04);
+		a3textureActivate(demoState->tex_atlas_sm, a3tex_unit05);
+		// uniforms
+		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, skyblue);
+		break;
+	}
+	// reset other uniforms
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, a3mat4_identity.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
 	a3vertexDrawableRenderActive();
 
 
@@ -525,19 +702,25 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	currentDemoProgram = demoState->prog_drawTexture_brightPass;
 	a3shaderProgramActivate(currentDemoProgram->program);
 
+<<<<<<< HEAD
 	// ****TO-DO: 
 	//	-> 2.1g: perform bright pass (3 lines): 
 	//		-> 1) activate frameuffer for writing
 	//		-> 2) bind first color texture from framebuffer used in previous pass
 	//		-> 3) draw full-screen quad (already active)
 	
+=======
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 	currentPass = pipelines_passBright_2;
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
 	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3vertexDrawableRenderActive();
+<<<<<<< HEAD
 	
+=======
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 
 	// blur half-size
 	currentDemoProgram = demoState->prog_drawTexture_blurGaussian;
@@ -545,6 +728,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 
+<<<<<<< HEAD
 	// ****TO-DO: 
 	//	-> 3.1b: perform 1D blur pass, horizontal axis (4 lines): 
 	//		-> 1) activate framebuffer for writing
@@ -552,6 +736,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	//		-> 3) send blur axis as uniform (2D vector)
 	//		-> 4) draw full-screen quad (already active
 	
+=======
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 	currentPass = pipelines_passBlurH_2;
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
@@ -559,12 +745,16 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisH.v);
 	a3vertexDrawableRenderActive();
+<<<<<<< HEAD
 	
 
 	// ****TO-DO: 
 	//	-> 3.1c: repeat previous pass but using vertical axis
 	//sampleAxisV = a3vec2_y;	// delete this line; variable is already initialized
 	
+=======
+
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 	currentPass = pipelines_passBlurV_2;
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
@@ -572,6 +762,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisV.v);
 	a3vertexDrawableRenderActive();
+<<<<<<< HEAD
 	
 
 
@@ -652,6 +843,59 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 
 
+=======
+
+	// bright-pass quarter-size
+	currentDemoProgram = demoState->prog_drawTexture_brightPass;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_passBright_4;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	a3vertexDrawableRenderActive();
+
+	// blur quarter-size
+	currentDemoProgram = demoState->prog_drawTexture_blurGaussian;
+	a3shaderProgramActivate(currentDemoProgram->program);
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+
+	currentPass = pipelines_passBlurH_4;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisH.v);
+	a3vertexDrawableRenderActive();
+
+	currentPass = pipelines_passBlurV_4;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisV.v);
+	a3vertexDrawableRenderActive();
+
+	// bright-pass eighth-size
+	currentDemoProgram = demoState->prog_drawTexture_brightPass;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_passBright_8;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	a3vertexDrawableRenderActive();
+
+	// blur eighth-size
+	currentDemoProgram = demoState->prog_drawTexture_blurGaussian;
+	a3shaderProgramActivate(currentDemoProgram->program);
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 	currentPass = pipelines_passBlurH_8;
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
@@ -659,6 +903,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisH.v);
 	a3vertexDrawableRenderActive();
+<<<<<<< HEAD
 
 	currentPass = pipelines_passBlurV_8;
 	currentWriteFBO = writeFBO[currentPass];
@@ -675,7 +920,16 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 
 
+=======
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 
+	currentPass = pipelines_passBlurV_8;
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisV.v);
+	a3vertexDrawableRenderActive();
 
 	// bloom composite
 	currentDemoProgram = demoState->prog_drawTexture_blendScreen4;
@@ -715,6 +969,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		else
 			a3framebufferBindDepthTexture(currentDisplayFBO, a3tex_unit00);
 		break;
+	case pipelines_passLighting:
 	case pipelines_passComposite:
 	case pipelines_passBright_2:
 	case pipelines_passBlurH_2:
@@ -739,7 +994,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		a3vertexDrawableActivate(currentDrawable);
 
 		// determine if additional passes are required
-		currentDemoProgram = displayProgram[pipeline][display];
+		currentDemoProgram = displayProgram[display];
 		a3shaderProgramActivate(currentDemoProgram->program);
 
 		switch (demoMode->display)

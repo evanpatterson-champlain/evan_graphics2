@@ -42,9 +42,11 @@
 
 #include "_a3_demo_utilities/a3_DemoSceneObject.h"
 #include "_a3_demo_utilities/a3_DemoShaderProgram.h"
+#include "_a3_demo_utilities/animation/a3_Kinematics.h"
 
 #include "a3_Demo_Shading.h"
 #include "a3_Demo_Pipelines.h"
+#include "a3_Demo_Keyframes.h"
 
 
 //-----------------------------------------------------------------------------
@@ -66,6 +68,7 @@ extern "C"
 	{
 		demoState_shading,				// basic shading mode
 		demoState_pipelines,			// different pipelines for exploration
+		demoState_keyframes,			// keyframe animation, interpolation and curve drawing
 
 		demoState_mode_max
 	};
@@ -93,15 +96,25 @@ extern "C"
 		demoStateMaxCount_cameraObject = 1,
 		demoStateMaxCount_lightObject = 4,
 		demoStateMaxCount_projector = 2,
+		demoStateMaxCount_waypoint = 32,
+
+		demoStateMaxCount_lightUniformBufferType = 4,
+		demoStateMaxCount_lightVolumeBlock = 4,
+		demoStateMaxCount_lightVolumePerBlock = a3index_countMaxShort / sizeof(a3_DemoPointLight),
+		demoStateMaxCount_lightVolume = demoStateMaxCount_lightVolumeBlock * demoStateMaxCount_lightVolumePerBlock,
+		demoStateMaxCount_lightUniformBuffer = demoStateMaxCount_lightUniformBufferType * demoStateMaxCount_lightVolumeBlock,
+		demoStateMaxCount_transformUniformBuffer = 4,
+		demoStateMaxCount_miscUniformBuffer = 4,
 
 		demoStateMaxCount_timer = 1,
 
 		demoStateMaxCount_drawDataBuffer = 1,
 		demoStateMaxCount_vertexArray = 8,
 		demoStateMaxCount_drawable = 16,
-		
+
 		demoStateMaxCount_shaderProgram = 32,
-		
+		demoStateMaxCount_uniformBuffer = demoStateMaxCount_lightUniformBuffer + demoStateMaxCount_transformUniformBuffer + demoStateMaxCount_miscUniformBuffer,
+
 		demoStateMaxCount_texture = 16,
 
 		demoStateMaxCount_framebuffer = 16,
@@ -156,6 +169,7 @@ extern "C"
 		// demo modes
 		a3_Demo_Shading demoMode_shading[1];
 		a3_Demo_Pipelines demoMode_pipelines[1];
+		a3_Demo_Keyframes demoMode_keyframes[1];
 		a3_DemoState_ModeName demoMode;
 
 		// cameras
@@ -163,7 +177,8 @@ extern "C"
 
 		// toggle grid in scene and axes superimposed, as well as other mods
 		a3boolean displayGrid, displaySkybox, displayHiddenVolumes, displayPipeline;
-		a3boolean displayWorldAxes, displayObjectAxes, displayTangentBases;
+		a3boolean displayWorldAxes, displayObjectAxes;
+		a3boolean displayTangentBases, displayWireframe;
 		a3boolean updateAnimation;
 		a3boolean stencilTest;
 		a3boolean skipIntermediatePasses;
@@ -174,7 +189,36 @@ extern "C"
 
 		// lights
 		a3ui32 forwardLightCount;
+		a3ui32 deferredLightCount, deferredLightBlockCount, deferredLightCountPerBlock[demoStateMaxCount_lightVolumeBlock];
+		
 		a3_DemoPointLight forwardPointLight[demoStateMaxCount_lightObject];
+		a3_DemoPointLight deferredPointLight[demoStateMaxCount_lightVolume];
+
+		a3mat4 deferredLightMVP[demoStateMaxCount_lightVolume], deferredLightMVPB[demoStateMaxCount_lightVolume];
+
+
+		// texture atlas transforms
+		union {
+			a3mat4 atlasTransform[4];
+			struct {
+				a3mat4 atlas_stone[1], atlas_earth[1], atlas_mars[1], atlas_checker[1];
+			};
+		};
+
+
+		// test animation controller and waypoints for interpolation
+		a3real segmentDuration, segmentDurationInv;
+		a3real segmentTime, segmentParam;
+		a3ui32 segmentIndex, segmentCount;
+		a3vec4 curveWaypoint[demoStateMaxCount_waypoint];
+		a3vec4 curveHandle[demoStateMaxCount_waypoint];
+
+
+		// skeletal objects
+		a3_Hierarchy hierarchy_skel[1];
+		a3_HierarchyState hierarchyState_skel[1];
+		a3_HierarchyPoseGroup hierarchyPoseGroup_skel[1];
+		a3_HierarchyPoseFlag hierarchyPoseFlag_skel[1][128];
 
 
 		//---------------------------------------------------------------------
@@ -187,14 +231,22 @@ extern "C"
 		union {
 			a3_DemoSceneObject sceneObject[demoStateMaxCount_sceneObject];
 			struct {
-				// main scene objects
+				// general scene objects
 				a3_DemoSceneObject
-					skyboxObject[1],
+					skyboxObject[1];
+
+				// interactive scene objects
+				a3_DemoSceneObject
 					planeObject[1],
 					sphereObject[1],
 					cylinderObject[1],
 					torusObject[1],
 					teapotObject[1];
+
+				// animating scene objects
+				a3_DemoSceneObject
+					morphObject[1],
+					skeletonObject[1];
 			};
 		};
 		union {
@@ -249,6 +301,8 @@ extern "C"
 			a3_VertexArrayDescriptor vertexArray[demoStateMaxCount_vertexArray];
 			struct {
 				a3_VertexArrayDescriptor
+					vao_tangentbasis_morph[1],
+					vao_tangentbasis[1],						// VAO for vertex format with full tangent basis (tangent, bitangent, normal, position)
 					vao_position_texcoord_normal[1],			// VAO for vertex format with position, texture coordinates and normal
 					vao_position_texcoord[1],					// VAO for vertex format with position and texture coordinates
 					vao_position_color[1],						// VAO for vertex format with position and color
@@ -267,6 +321,8 @@ extern "C"
 					draw_skybox[1],								// skybox cube mesh
 					draw_unitquad[1];							// unit quad (used for fsq)
 				a3_VertexDrawable
+					draw_skeletal_joint[1],						// joint for skeleton
+					draw_skeletal_bone[1],						// bone for skeleton
 					draw_pointlight[1];							// volume for point light (low-res sphere)
 				a3_VertexDrawable
 					draw_plane[1],								// procedural plane
@@ -274,6 +330,8 @@ extern "C"
 					draw_cylinder[1],							// procedural cylinder
 					draw_torus[1],								// procedural torus
 					draw_teapot[1];								// can't not have a Utah teapot
+				a3_VertexDrawable
+					draw_teapot_morph[1];						// a MORPHING UTAH TEAPOT whaaaaaat???
 			};
 		};
 
@@ -309,6 +367,19 @@ extern "C"
 					prog_drawTexture_brightPass[1],				// draw texture with bright-pass or tone-mapping
 					prog_drawTexture_blurGaussian[1],			// draw texture with Gaussian blurring
 					prog_drawTexture_blendScreen4[1];			// draw texture with 4-layer screen blend
+				a3_DemoStateShaderProgram
+					prog_drawLightingData[1],					// draw attributes passed from vertex shader (g-buffers)
+					prog_drawPhong_multi_deferred[1],			// draw Phong shading model, multiple lights, in deferred pass
+					prog_drawPhongVolume_instanced[1],			// draw Phong light volume (point light)
+					prog_drawPhongComposite[1];					// draw Phong shading model by compositing light volumes
+				a3_DemoStateShaderProgram
+					prog_drawCurveSegment[1],					// draw curve segment using interpolation
+					prog_drawPhong_multi_forward_mrt[1],		// draw Phong with forward point lights and MRT
+					prog_drawOverlays_tangents_wireframe[1];	// draw tangent bases using geometry shader
+				a3_DemoStateShaderProgram
+					prog_drawColorizedHierarchy_instanced[1],	// draw instanced hierarchical model with colorization per instance
+					prog_drawPhong_multi_forward_mrt_morph[1],	// draw Phong with forward point lights and MRT with morphing
+					prog_drawOverlays_tb_wf_morph[1];			// draw overlays on morphed mesh
 			};
 		};
 
@@ -320,6 +391,8 @@ extern "C"
 				a3_Texture
 					tex_skybox_clouds[1],
 					tex_skybox_water[1],
+					tex_atlas_dm[1],
+					tex_atlas_sm[1],
 					tex_earth_dm[1],
 					tex_earth_sm[1],
 					tex_mars_dm[1],
@@ -341,6 +414,7 @@ extern "C"
 				a3_Framebuffer
 					fbo_shadow_d32[1];							// framebuffer for capturing shadow map
 				a3_Framebuffer
+<<<<<<< HEAD
 					// ****TO-DO: 
 					//	-> 2.1a: uncomment post-processing framebuffers
 					
@@ -348,7 +422,39 @@ extern "C"
 					fbo_post_c16_4fr[3],						// framebuffers for post-processing, quarter frame size
 					fbo_post_c16_8fr[3],						// framebuffers for post-processing, eighth frame size
 					
+=======
+					fbo_post_c16_2fr[3],						// framebuffers for post-processing, half frame size
+					fbo_post_c16_4fr[3],						// framebuffers for post-processing, quarter frame size
+					fbo_post_c16_8fr[3],						// framebuffers for post-processing, eighth frame size
+>>>>>>> 41d9715404c260eb4175e827536c048cb46cb730
 					fbo_composite_c16[3];						// framebuffers for composition
+			};
+		};
+
+
+		// uniform buffer objects
+		union {
+			a3_UniformBuffer uniformBuffer[demoStateMaxCount_uniformBuffer];
+			struct {
+				// transform uniform buffers
+				a3_UniformBuffer
+					ubo_transformStack_model[demoStateMaxCount_transformUniformBuffer];	// model transform stack
+
+				// light transform uniform buffers
+				a3_UniformBuffer
+					ubo_transformMVPB_light[demoStateMaxCount_lightVolumeBlock],	// MVPB matrices for lights if needed
+					ubo_transformMVP_light[demoStateMaxCount_lightVolumeBlock];		// MVP matrices for lights if needed
+
+				// lighting uniform buffers
+				a3_UniformBuffer
+					ubo_pointLight[demoStateMaxCount_lightVolumeBlock];				// individual light data
+
+				// animation uniform buffers
+				a3_UniformBuffer
+					ubo_transformLMVP_joint[1],										// transforms for skeletal joints
+					ubo_transformLMVP_bone[1],										// transforms for skeletal bones
+					ubo_hierarchy[1],												// hierarchical information
+					ubo_curveWaypoint[1];											// interpolation curve waypoints
 			};
 		};
 
