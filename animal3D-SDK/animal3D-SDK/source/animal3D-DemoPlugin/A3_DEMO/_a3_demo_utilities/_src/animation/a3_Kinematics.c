@@ -39,13 +39,17 @@ extern inline a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hie
 	if (hierarchyState && hierarchyState->poseGroup && 
 		firstIndex < hierarchyState->poseGroup->hierarchy->numNodes && nodeCount)
 	{
-	//	a3i32 parentIndex;
+		a3i32 parentIndex;
 		a3ui32 i, end = firstIndex + nodeCount;
 		end = a3minimum(end, hierarchyState->poseGroup->hierarchy->numNodes);
 
 		for (i = firstIndex; i < end; ++i)
 		{
 			// ****TO-DO: implement forward kinematics algorithm
+
+			parentIndex = hierarchyState->poseGroup->hierarchy->nodes[i].parentIndex;
+			
+			a3real4x4Product(hierarchyState->objectSpace->transform[i].m, hierarchyState->objectSpace->transform[parentIndex].m, hierarchyState->localSpace->transform[i].m);
 
 		}
 

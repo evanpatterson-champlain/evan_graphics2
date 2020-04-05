@@ -23,7 +23,7 @@
 		instance in a hierarchy.
 */
 
-#version 410
+#version 420
 
 #define MAX_INSTANCES 1024
 #define MAX_NODES 128
@@ -45,14 +45,27 @@ uniform ubTransformMVP {
 	mat4 uMVP[MAX_INSTANCES];
 };
 
+
 uniform vec4 uColor[MAX_COLORS];
 
 out vec4 vColor;
+
+layout (binding = 4) uniform nodeInfo
+{
+  int uIndex;
+};
+
+
+vec4 white = vec4(1.0);
+vec4 black = vec4(vec3(0.0), 1.0);
+vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
+
 
 void main()
 {
 	gl_Position = uMVP[gl_InstanceID] * aPosition;
 
-	// DUMMY OUTPUT: select first color
-	vColor = uColor[0];
+	vColor = uColor[uIndex];
+
+
 }
