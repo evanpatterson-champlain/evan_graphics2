@@ -50,9 +50,15 @@ uniform vec4 uColor[MAX_COLORS];
 
 out vec4 vColor;
 
+struct node{
+	int name[8];
+	int index;
+	int parentIndex;
+};
+
 layout (binding = 4) uniform nodeInfo
 {
-  int uIndex;
+  node nodes[32];
 };
 
 
@@ -65,7 +71,7 @@ void main()
 {
 	gl_Position = uMVP[gl_InstanceID] * aPosition;
 
-	vColor = uColor[uIndex];
+	vColor = uColor[nodes[gl_InstanceID].index];
 
 
 }

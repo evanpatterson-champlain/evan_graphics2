@@ -73,12 +73,11 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 	i = a3bufferRefill(demoState->ubo_curveWaypoint, 0, sizeof(demoState->curveWaypoint), demoState->curveWaypoint);
 	a3bufferRefillOffset(demoState->ubo_curveWaypoint, 0, i, sizeof(demoState->curveHandle), demoState->curveHandle);
 
-
 	// update animation
 	if (demoMode->interp)
 	{
 		a3ui32 k[4] = { 0 };
-	//	a3vec4 m[2] = { 0 };
+		a3vec4 m[2] = { 0 };
 
 		// update controller
 		if (demoState->updateAnimation)
@@ -128,14 +127,14 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 				demoState->curveHandle[k[0]].v,
 				demoState->curveHandle[k[1]].v,
 				demoState->segmentParam);
-		//	a3real4Diff(m[0].v, demoState->curveHandle[k[0]].v, demoState->curveWaypoint[k[0]].v);
-		//	a3real4Diff(m[1].v, demoState->curveHandle[k[1]].v, demoState->curveWaypoint[k[1]].v);
-		//	a3real3HermiteTangent(demoState->skeletonObject->position.v,
-		//		demoState->curveWaypoint[k[0]].v,
-		//		demoState->curveWaypoint[k[1]].v,
-		//		m[0].v,
-		//		m[1].v,
-		//		demoState->segmentParam);
+			a3real4Diff(m[0].v, demoState->curveHandle[k[0]].v, demoState->curveWaypoint[k[0]].v);
+			a3real4Diff(m[1].v, demoState->curveHandle[k[1]].v, demoState->curveWaypoint[k[1]].v);
+			a3real3HermiteTangent(demoState->skeletonObject->position.v,
+				demoState->curveWaypoint[k[0]].v,
+				demoState->curveWaypoint[k[1]].v,
+				m[0].v,
+				m[1].v,
+				demoState->segmentParam);
 			break;
 		}
 	}
@@ -203,13 +202,13 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 		a3bufferRefill(demoState->ubo_transformLMVP_joint, 0, currentHierarchy->numNodes * sizeof(a3mat4), localModelViewProjectionMat);
 
 		// calculate and send skinning matrices
-	//	a3hierarchyStateUpdateObjectBindToCurrent(currentHierarchyState, ???);
-	//	for (i = 0; i < currentHierarchy->numNodes; ++i)
-	//	{
-	//		localModelViewProjectionMat[i] = currentHierarchyState->objectSpaceBindToCurrent->transform[i];
-	//		a3real4x4ConcatR(modelViewProjectionMat.m, localModelViewProjectionMat[i].m);
-	//	}
-	//	a3bufferRefill(demoState->???, 0, currentHierarchy->numNodes * sizeof(a3mat4), localModelViewProjectionMat);
+		a3hierarchyStateUpdateObjectBindToCurrent(currentHierarchyState, currentHierarchyState->localSpace);
+		for (i = 0; i < currentHierarchy->numNodes; ++i)
+		{
+			localModelViewProjectionMat[i] = currentHierarchyState->objectSpaceBindToCurrent->transform[i];
+			a3real4x4ConcatR(modelViewProjectionMat.m, localModelViewProjectionMat[i].m);
+		}
+		a3bufferRefill(demoState->ubo_curveWaypoint, 0, currentHierarchy->numNodes * sizeof(a3mat4), localModelViewProjectionMat);
 
 		// send hierarchical info
 		a3bufferRefill(demoState->ubo_hierarchy, 0, currentHierarchy->numNodes * sizeof(a3_HierarchyNode), currentHierarchy->nodes);

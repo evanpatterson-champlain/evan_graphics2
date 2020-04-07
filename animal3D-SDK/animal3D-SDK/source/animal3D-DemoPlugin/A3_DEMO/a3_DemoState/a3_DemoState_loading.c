@@ -1244,9 +1244,9 @@ void a3demo_loadAnimation(a3_DemoState* demoState)
 	hierarchyNodePose = hierarchyPoseGroup->pose[p].nodePose + j;
 	a3hierarchyNodePoseSetRotation(hierarchyNodePose, 0.0f, +90.0f, 0.0f, a3true);
 	a3hierarchyNodePoseSetTranslation(hierarchyNodePose, -0.1f, +0.1f, 0.0f);
-//	j = a3hierarchyGetNodeIndex(hierarchy, "skel:pelvis");
-//	hierarchyNodePose = hierarchyPoseGroup->pose[p].nodePose + j;
-//	a3hierarchyNodePoseSetTranslation(hierarchyNodePose, 0.0f, +0.1f, -0.1f);
+	j = a3hierarchyGetNodeIndex(hierarchy, "skel:pelvis");
+	hierarchyNodePose = hierarchyPoseGroup->pose[p].nodePose + j;
+	a3hierarchyNodePoseSetTranslation(hierarchyNodePose, 0.0f, +0.1f, -0.1f);
 
 	j = a3hierarchyGetNodeIndex(hierarchy, "skel:shoulderblade_r");
 	hierarchyNodePose = hierarchyPoseGroup->pose[p].nodePose + j;
