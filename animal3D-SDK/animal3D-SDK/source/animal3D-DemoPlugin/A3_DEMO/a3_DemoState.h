@@ -128,7 +128,7 @@ extern "C"
 	{
 		//---------------------------------------------------------------------
 		// general variables pertinent to the state
-
+		
 		// terminate key pressed
 		a3i32 exitFlag;
 

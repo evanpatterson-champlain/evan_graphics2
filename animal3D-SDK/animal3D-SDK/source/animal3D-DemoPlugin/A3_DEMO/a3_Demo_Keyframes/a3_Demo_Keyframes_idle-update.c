@@ -34,7 +34,7 @@
 #include "../a3_DemoState.h"
 
 #include "../_a3_demo_utilities/a3_DemoMacros.h"
-
+#include<stdio.h>
 
 //-----------------------------------------------------------------------------
 // UPDATE
@@ -72,6 +72,9 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 	// send curve data
 	i = a3bufferRefill(demoState->ubo_curveWaypoint, 0, sizeof(demoState->curveWaypoint), demoState->curveWaypoint);
 	a3bufferRefillOffset(demoState->ubo_curveWaypoint, 0, i, sizeof(demoState->curveHandle), demoState->curveHandle);
+
+
+	demoState->hierarchyState_skel->poseGroup->pose->nodePose[13].translation.y += (a3real)0.01;
 
 	// update animation
 	if (demoMode->interp)
@@ -127,6 +130,7 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 				demoState->curveHandle[k[0]].v,
 				demoState->curveHandle[k[1]].v,
 				demoState->segmentParam);
+			/*
 			a3real4Diff(m[0].v, demoState->curveHandle[k[0]].v, demoState->curveWaypoint[k[0]].v);
 			a3real4Diff(m[1].v, demoState->curveHandle[k[1]].v, demoState->curveWaypoint[k[1]].v);
 			a3real3HermiteTangent(demoState->skeletonObject->position.v,
@@ -134,7 +138,7 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 				demoState->curveWaypoint[k[1]].v,
 				m[0].v,
 				m[1].v,
-				demoState->segmentParam);
+				demoState->segmentParam);*/
 			break;
 		}
 	}
