@@ -131,10 +131,7 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 		switch (demoMode->interp)
 		{
 		case keyframes_interpLerp:
-			/*a3real3Lerp(&(demoState->hierarchyState_skel->poseGroup->pose->nodePose->orientation),
-				demoState->curveWaypoint[k[0]].v,
-				demoState->curveWaypoint[k[1]].v,
-				demoState->segmentParam);*/
+			//a3real3Lerp
 			demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexL].orientation.z = (a3real)50.0;
 			demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexR].orientation.z = (a3real)-50.0;
 			if (demoState->movingForward == 0) {
