@@ -220,6 +220,9 @@ extern "C"
 		a3_HierarchyPoseGroup hierarchyPoseGroup_skel[1];
 		a3_HierarchyPoseFlag hierarchyPoseFlag_skel[1][128];
 
+		// is it moving into pose?
+		char movingForward;
+
 
 		//---------------------------------------------------------------------
 		// object arrays: organized as anonymous unions for two reasons: 

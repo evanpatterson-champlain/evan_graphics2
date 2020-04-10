@@ -36,6 +36,15 @@
 #include "../_a3_demo_utilities/a3_DemoMacros.h"
 #include<stdio.h>
 
+
+// I am only using this function because the a3 version was giving me an error
+a3real linearInterp(double p1, double p2, double time) {
+	return (a3real)(p1 + (time * (p2 - p1)));
+}
+
+
+
+
 //-----------------------------------------------------------------------------
 // UPDATE
 
@@ -73,9 +82,6 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 	i = a3bufferRefill(demoState->ubo_curveWaypoint, 0, sizeof(demoState->curveWaypoint), demoState->curveWaypoint);
 	a3bufferRefillOffset(demoState->ubo_curveWaypoint, 0, i, sizeof(demoState->curveHandle), demoState->curveHandle);
 
-
-	demoState->hierarchyState_skel->poseGroup->pose->nodePose[13].translation.y += (a3real)0.01;
-
 	// update animation
 	if (demoMode->interp)
 	{
@@ -89,6 +95,7 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 		{
 			demoState->segmentTime -= demoState->segmentDuration;
 			demoState->segmentIndex = (demoState->segmentIndex + 1) % demoState->segmentCount;
+			demoState->movingForward = (demoState->movingForward == 0 ? 1 : 0);
 		}
 		demoState->segmentParam = demoState->segmentTime * demoState->segmentDurationInv;
 
@@ -98,14 +105,50 @@ void a3keyframes_update(a3_DemoState* demoState, a3_Demo_Keyframes* demoMode, a3
 		k[2] = (i + 2) % demoState->segmentCount;
 		k[3] = (i + demoState->segmentCount - 1) % demoState->segmentCount;
 
+
+
+		// added personal code
+		int shoulderIndexL = a3hierarchyGetNodeIndex(demoState->hierarchy_skel, "skel:shoulder_l");
+		int shoulderIndexR = a3hierarchyGetNodeIndex(demoState->hierarchy_skel, "skel:shoulder_r");
+
+		int hipIndexL = a3hierarchyGetNodeIndex(demoState->hierarchy_skel, "skel:hip_l");
+		int hipIndexR = a3hierarchyGetNodeIndex(demoState->hierarchy_skel, "skel:hip_r");
+
+
+		//int shdlrDx = a3hierarchyGetNodeIndex(demoState->hierarchy_skel, "skel:shoulder_l");
+		//printf("x: %f \n", (float)demoState->hierarchyState_skel->poseGroup->pose->nodePose->orientation.x);
+		//printf("y: %f \n", (float)demoState->hierarchyState_skel->poseGroup->pose->nodePose->orientation.y);
+		//printf("w: %f \n", (float)demoState->hierarchyState_skel->poseGroup->pose->nodePose->orientation.w);
+
+
+		double point1 = 20.0;
+		double point2 = 120.0;
+
+		double hipPoint1 = 40;
+		double hipPoint2 = -40;
+
 		// perform position interpolation on current segment
 		switch (demoMode->interp)
 		{
 		case keyframes_interpLerp:
-			a3real3Lerp(demoState->skeletonObject->position.v,
+			/*a3real3Lerp(&(demoState->hierarchyState_skel->poseGroup->pose->nodePose->orientation),
 				demoState->curveWaypoint[k[0]].v,
 				demoState->curveWaypoint[k[1]].v,
-				demoState->segmentParam);
+				demoState->segmentParam);*/
+			demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexL].orientation.z = (a3real)50.0;
+			demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexR].orientation.z = (a3real)-50.0;
+			if (demoState->movingForward == 0) {
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexL].orientation.x = linearInterp(point1, point2, demoState->segmentParam);
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexR].orientation.x = linearInterp(point2, point1, demoState->segmentParam);
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[hipIndexL].orientation.x = linearInterp(hipPoint1, hipPoint2, demoState->segmentParam);
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[hipIndexR].orientation.x = linearInterp(hipPoint2, hipPoint1, demoState->segmentParam);
+			}
+			else {
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexL].orientation.x = linearInterp(point2, point1, demoState->segmentParam);
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[shoulderIndexR].orientation.x = linearInterp(point1, point2, demoState->segmentParam);
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[hipIndexL].orientation.x = linearInterp(hipPoint2, hipPoint1, demoState->segmentParam);
+				demoState->hierarchyState_skel->poseGroup->pose->nodePose[hipIndexR].orientation.x = linearInterp(hipPoint1, hipPoint2, demoState->segmentParam);
+			}
 			break;
 		case keyframes_interpBezier:
 			a3real3Bezier3(demoState->skeletonObject->position.v,

@@ -1357,13 +1357,20 @@ void a3demo_loadAnimation(a3_DemoState* demoState)
 
 	// ****TO-DO: 
 	//	-> set up additional poses
+	
 
-
+	
+	demoState->movingForward = 0;
 
 	// finally set up hierarchy states
 	hierarchyPoseGroup = demoState->hierarchyPoseGroup_skel + demoState->demoMode_keyframes->editSkeletonIndex;
 	hierarchyState = demoState->hierarchyState_skel + demoState->demoMode_keyframes->editSkeletonIndex;
 	a3hierarchyStateCreate(hierarchyState, hierarchyPoseGroup);
+	//
+	//int shdlrDx = a3hierarchyGetNodeIndex(hierarchy, "skel:shoulder_l");
+	//printf("x: %f \n", (float)hierarchyState->poseGroup->pose->nodePose->orientation.x);
+	//printf("y: %f \n", (float)hierarchyState->poseGroup->pose->nodePose->orientation.y);
+	//printf("z: %f \n", (float)hierarchyState->poseGroup->pose->nodePose->orientation.z);
 }
 
 
