@@ -95,6 +95,8 @@ extern "C"
 		pipelines_passShadow,			// capture shadow map
 		pipelines_passScene,			// render scene objects
 		pipelines_passComposite,		// composite for post-processing stage
+
+		/*
 		pipelines_passBright_2,			// bright pass for bloom (half screen size)
 		pipelines_passBlurH_2,			// horizontal blur for bloom (half screen size)
 		pipelines_passBlurV_2,			// horizontal blur for bloom (half screen size)
@@ -105,6 +107,7 @@ extern "C"
 		pipelines_passBlurH_8,			// horizontal blur for bloom (eighth screen size)
 		pipelines_passBlurV_8,			// horizontal blur for bloom (eighth screen size)
 		pipelines_passBlend,			// bloom composite pass
+		*/
 
 		pipelines_processLine,
 		pipelines_findDirection,

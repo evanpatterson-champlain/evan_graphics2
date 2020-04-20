@@ -66,7 +66,7 @@ void a3pipelinesCB_input_keyCharPress(a3_DemoState const* demoState, a3_Demo_Pip
 	case 'I':
 		if (demoState->skipIntermediatePasses)
 		{
-			a3demoCtrlIncClamp(demoMode->pass, pipelines_passBlend, pipelines_passComposite);
+			a3demoCtrlIncClamp(demoMode->pass, pipelines_finalBlend, pipelines_passComposite);
 			a3demoCtrlIncClamp(demoMode->pass, pipelines_passScene, -1);
 		}
 		break;
@@ -74,7 +74,7 @@ void a3pipelinesCB_input_keyCharPress(a3_DemoState const* demoState, a3_Demo_Pip
 		a3demoCtrlDecLoop(demoMode->pass, pipelines_pass_max);
 		if (demoState->skipIntermediatePasses)
 		{
-			a3demoCtrlDecClamp(demoMode->pass, pipelines_passBlend, pipelines_passComposite);
+			a3demoCtrlDecClamp(demoMode->pass, pipelines_finalBlend, pipelines_passComposite);
 			a3demoCtrlDecClamp(demoMode->pass, pipelines_passScene, -1);
 			demoMode->pass = (demoMode->pass + pipelines_pass_max) % pipelines_pass_max;
 		}

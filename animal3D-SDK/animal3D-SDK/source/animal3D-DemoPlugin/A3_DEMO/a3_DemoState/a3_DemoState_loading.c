@@ -800,6 +800,8 @@ void a3demo_loadTextures(a3_DemoState* demoState)
 			a3_DemoStateTexture texRampDM[1];
 			a3_DemoStateTexture texRampSM[1];
 			a3_DemoStateTexture texChecker[1];
+			a3_DemoStateTexture texPencilSketch[1];
+			a3_DemoStateTexture texPencilSketch2[1];
 		};
 	} textureList = {
 		{
@@ -813,6 +815,8 @@ void a3demo_loadTextures(a3_DemoState* demoState)
 			{ demoState->tex_ramp_dm,		"tex:ramp-dm",		"../../../../resource/tex/sprite/celRamp_dm.png" },
 			{ demoState->tex_ramp_sm,		"tex:ramp-sm",		"../../../../resource/tex/sprite/celRamp_sm.png" },
 			{ demoState->tex_checker,		"tex:checker",		"../../../../resource/tex/sprite/checker.png" },
+			{ demoState->tex_pencil1,		"tex:pencil1",		"../../../../resource/tex/pencil/7-Figure7-1.png" },
+			{ demoState->tex_pencil2,		"tex:pencil2",		"../../../../resource/tex/pencil/checker.png" },
 		}
 	};
 	const a3ui32 numTextures = sizeof(textureList) / sizeof(a3_DemoStateTexture);

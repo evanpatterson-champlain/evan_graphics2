@@ -41,6 +41,9 @@ uniform vec4 uLightCol[4];
 uniform sampler2D uTex_dm;
 uniform sampler2D uTex_sm;
 
+uniform sampler2D uImage02;
+
+
 // in position
 in vec4 viewSpacePos;
 in vec4 normVar;
@@ -109,5 +112,12 @@ void main()
 
 	// specular total
 	specTotalOut = vec4(colSpecular, 1.0);
+
+	// pencil
+	float pencilDrawing = texture(uImage02, texCoorVar.xy).r;
+
+	colorOut.rgb = 1.0 - min(colorOut.rgb + pencilDrawing, 1.0);
+	colorOut.rgb *= (specTotalOut.rgb + diffTotalOut.rgb);
+	colorOut.rgb = 1.0 - colorOut.rgb;
 
 }

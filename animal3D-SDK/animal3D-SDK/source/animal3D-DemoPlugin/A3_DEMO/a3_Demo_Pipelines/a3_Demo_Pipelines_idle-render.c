@@ -79,16 +79,6 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Pass: Capture shadow map",
 		"Pass: Render scene objects",
 		"Pass: Composite scene",
-		"Pass: Bright pass (1/2 frame)",
-		"Pass: Horizontal blur (1/2 frame)",
-		"Pass: Vertical blur (1/2 frame)",
-		"Pass: Bright pass (1/4 frame)",
-		"Pass: Horizontal blur (1/4 frame)",
-		"Pass: Vertical blur (1/4 frame)",
-		"Pass: Bright pass (1/8 frame)",
-		"Pass: Horizontal blur (1/8 frame)",
-		"Pass: Vertical blur (1/8 frame)",
-		"Pass: Bloom composite",
 		"Pass: Lines",
 		"Pass: Find Direction",
 		"Pass: Distort Line",
@@ -130,16 +120,6 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	a3byte const* const* targetText[pipelines_pass_max] = {
 		targetText_shadow,
 		targetText_scene,
-		targetText_composite,
-		targetText_bright,
-		targetText_blur,
-		targetText_blur,
-		targetText_bright,
-		targetText_blur,
-		targetText_blur,
-		targetText_bright,
-		targetText_blur,
-		targetText_blur,
 		targetText_composite,
 		targetText_lines,
 		targetText_lines,
@@ -191,7 +171,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	const a3_Framebuffer* currentReadFBO, * currentWriteFBO, * currentDisplayFBO;
 
 	// indices
-	a3ui32 i, j, k;
+	// a3ui32 i, j unreferenced
+	a3ui32 k;
 
 	// RGB
 	const a3vec4 rgba4[] = {
@@ -268,25 +249,6 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->fbo_shadow_d32,
 		demoState->fbo_scene_c16d24s8_mrt,
 		demoState->fbo_composite_c16 + 2,
-		// ****TO-DO: 
-		//	-> 2.1d: uncomment half-size framebuffers
-		//	-> 4.1c: add smaller framebuffers for writing additional passes (6 lines)
-
-		demoState->fbo_post_c16_2fr + 0,
-		demoState->fbo_post_c16_2fr + 1,
-		demoState->fbo_post_c16_2fr + 2,
-
-		demoState->fbo_post_c16_4fr + 0,
-		demoState->fbo_post_c16_4fr + 1,
-		demoState->fbo_post_c16_4fr + 2,
-
-		demoState->fbo_post_c16_8fr + 0,
-		demoState->fbo_post_c16_8fr + 1,
-		demoState->fbo_post_c16_8fr + 2,
-
-		demoState->fbo_composite_c16 + 0,
-
-
 		demoState->fbo_processLine + 0,
 		demoState->fbo_findDirection + 0,
 		demoState->fbo_distortLine + 0,
@@ -298,34 +260,10 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		{ 0, },
 		{ 0, demoState->fbo_shadow_d32, 0, },
 		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
-		{ demoState->fbo_composite_c16 + 2, 0, },
-		// ****TO-DO: 
-		//	-> 2.1e: uncomment half-size framebuffers
-		//	-> 4.1d: add smaller framebuffers for reading additional passes (6 lines)
-		
-		{ demoState->fbo_post_c16_2fr + 0, 0, },
-		{ demoState->fbo_post_c16_2fr + 1, 0, },
-		{ demoState->fbo_post_c16_2fr + 2, 0, },
-
-		{ demoState->fbo_post_c16_4fr + 0, 0, },
-		{ demoState->fbo_post_c16_4fr + 1, 0, },
-		{ demoState->fbo_post_c16_4fr + 2, 0, },
-
-		{ demoState->fbo_post_c16_8fr + 0, 0, },
-		{ demoState->fbo_post_c16_8fr + 1, 0, },
-
-
-		
-		// ****TO-DO: 
-		//	-> 2.1f: uncomment blend pass read list with half-size FBO and original composite
-	//	{ demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, 0, 0, },
-		// ****TO-DO: 
-		//	-> 4.1e: replace above blend pass read list with extended read list below
-		{ demoState->fbo_post_c16_8fr + 2, demoState->fbo_post_c16_4fr + 2, demoState->fbo_post_c16_2fr + 2, demoState->fbo_composite_c16 + 2, },
 		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
 		{ demoState->fbo_processLine, 0, },
 		{ demoState->fbo_findDirection, 0, },
-		{ demoState->fbo_composite_c16 + 0, demoState->fbo_distortLine, }
+		{ demoState->fbo_composite_c16 + 2, demoState->fbo_distortLine, }
 	};
 
 	// target info
@@ -345,8 +283,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 	// pixel size and effect axis
 	a3vec2 pixelSize = a3vec2_one;
-	a3vec2 sampleAxisH = a3vec2_x;
-	a3vec2 sampleAxisV = a3vec2_y;
+	//a3vec2 sampleAxisH = a3vec2_x;
+	//a3vec2 sampleAxisV = a3vec2_y;
 
 
 	// bias matrix
@@ -481,6 +419,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		{
 			a3textureActivate(texture_dm[k], a3tex_unit00);
 			a3textureActivate(texture_sm[k], a3tex_unit01);
+			a3textureActivate(demoState->tex_pencil1, a3tex_unit02);
+			a3textureActivate(demoState->tex_pencil2, a3tex_unit03);
 			a3demo_drawModelLighting_bias_other(modelViewProjectionBiasMat_other.m, modelViewProjectionMat.m, modelViewMat.m, viewProjectionBiasMat_other.m, viewProjectionMat.m, viewMat.m, currentSceneObject->modelMat.m, currentDemoProgram, drawable[k], rgba4[k + 3].v);
 		}
 	}	break;
@@ -533,195 +473,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3vertexDrawableActivate(currentDrawable);
 
 
-	//-------------------------------------------------------------------------
-	// POST-PROCESSING
-	//	- activate target framebuffer
-	//	- activate texture from previous framebuffer
-	//	- draw FSQ with processing program active
 
-	// bright passes: perform brighten or tone-mapping
-	//	-> simply sample from the previous pass result
-	// blur passes: perform 1D blur along specified axis
-	//	-> set pixel size to reciprocal of previous pass's write FBO
-	//	-> change axis per pass to reflect "horizontal" or "vertical"
-	// blend pass: blend all of the blurred images with the original scene
-	//	-> the blur passes iteratively flood the brightest areas over the 
-	//		image; composite with original scene to mix detail with light
-
-	// bright-pass half-size
-	currentDemoProgram = demoState->prog_drawTexture_brightPass;
-	a3shaderProgramActivate(currentDemoProgram->program);
-
-	// ****TO-DO: 
-	//	-> 2.1g: perform bright pass (3 lines): 
-	//		-> 1) activate frameuffer for writing
-	//		-> 2) bind first color texture from framebuffer used in previous pass
-	//		-> 3) draw full-screen quad (already active)
-	
-	currentPass = pipelines_passBright_2;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3vertexDrawableRenderActive();
-	
-
-	// blur half-size
-	currentDemoProgram = demoState->prog_drawTexture_blurGaussian;
-	a3shaderProgramActivate(currentDemoProgram->program);
-	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
-
-	// ****TO-DO: 
-	//	-> 3.1b: perform 1D blur pass, horizontal axis (4 lines): 
-	//		-> 1) activate framebuffer for writing
-	//		-> 2) bind first color texture from framebuffer used in previous pass
-	//		-> 3) send blur axis as uniform (2D vector)
-	//		-> 4) draw full-screen quad (already active
-	
-	currentPass = pipelines_passBlurH_2;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisH.v);
-	a3vertexDrawableRenderActive();
-	
-
-	// ****TO-DO: 
-	//	-> 3.1c: repeat previous pass but using vertical axis
-	//sampleAxisV = a3vec2_y;	// delete this line; variable is already initialized
-	
-	currentPass = pipelines_passBlurV_2;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisV.v);
-	a3vertexDrawableRenderActive();
-	
-
-
-
-
-
-
-
-	// ****TO-DO: 
-	//	-> 4.1f: repeat bright pass and blur passes on smaller FBOs
-
-	// size 4
-	currentDemoProgram = demoState->prog_drawTexture_brightPass;
-	a3shaderProgramActivate(currentDemoProgram->program);
-
-	currentPass = pipelines_passBright_4;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3vertexDrawableRenderActive();
-
-
-
-
-
-
-
-	currentDemoProgram = demoState->prog_drawTexture_blurGaussian;
-	a3shaderProgramActivate(currentDemoProgram->program);
-	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
-
-
-	currentPass = pipelines_passBlurH_4;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisH.v);
-	a3vertexDrawableRenderActive();
-
-	currentPass = pipelines_passBlurV_4;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisV.v);
-	a3vertexDrawableRenderActive();
-
-
-
-
-
-
-
-
-	// size 8
-	currentDemoProgram = demoState->prog_drawTexture_brightPass;
-	a3shaderProgramActivate(currentDemoProgram->program);
-
-	currentPass = pipelines_passBright_8;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3vertexDrawableRenderActive();
-
-
-
-
-
-
-
-	currentDemoProgram = demoState->prog_drawTexture_blurGaussian;
-	a3shaderProgramActivate(currentDemoProgram->program);
-	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
-
-
-	currentPass = pipelines_passBlurH_8;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisH.v);
-	a3vertexDrawableRenderActive();
-
-	currentPass = pipelines_passBlurV_8;
-	currentWriteFBO = writeFBO[currentPass];
-	currentReadFBO = readFBO[currentPass][0];
-	a3framebufferActivate(currentWriteFBO);
-	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
-	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uAxis, 1, sampleAxisV.v);
-	a3vertexDrawableRenderActive();
-
-
-
-
-
-
-
-
-
-
-	// bloom composite
-	currentDemoProgram = demoState->prog_drawTexture_blendScreen4;
-	a3shaderProgramActivate(currentDemoProgram->program);
-
-	currentPass = pipelines_passBlend;
-	currentWriteFBO = writeFBO[currentPass];
-	a3framebufferActivate(currentWriteFBO);
-	for (i = 0, j = 4; i < j; ++i)
-		a3framebufferBindColorTexture(readFBO[currentPass][i], a3tex_unit00 + i, 0);
-	a3vertexDrawableRenderActive();
-
-
-	
-
-
-
-
-	
 	currentDemoProgram = demoState->prog_drawTexture_processLine;
 	a3shaderProgramActivate(currentDemoProgram->program);
 
@@ -807,16 +559,6 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 			a3framebufferBindDepthTexture(currentDisplayFBO, a3tex_unit00);
 		break;
 	case pipelines_passComposite:
-	case pipelines_passBright_2:
-	case pipelines_passBlurH_2:
-	case pipelines_passBlurV_2:
-	case pipelines_passBright_4:
-	case pipelines_passBlurH_4:
-	case pipelines_passBlurV_4:
-	case pipelines_passBright_8:
-	case pipelines_passBlurH_8:
-	case pipelines_passBlurV_8:
-	case pipelines_passBlend:
 	case pipelines_processLine:
 	case pipelines_findDirection:
 	case pipelines_distortLine:
