@@ -48,10 +48,14 @@ out vec4 normVar;
 
 out vec4 viewForNormal;
 
+//out vec4 absCoord;
+
+
 void main()
 {
 	gl_Position = uMVP * aPosition;
 	texCoorVar = uAtlas * texCoor;
 	normVar = uMV_nrm * normIn;
 	viewForNormal = uMV * aPosition;
+	//absCoord = n / dist;
 }

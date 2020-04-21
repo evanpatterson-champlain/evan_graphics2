@@ -815,7 +815,7 @@ void a3demo_loadTextures(a3_DemoState* demoState)
 			{ demoState->tex_ramp_dm,		"tex:ramp-dm",		"../../../../resource/tex/sprite/celRamp_dm.png" },
 			{ demoState->tex_ramp_sm,		"tex:ramp-sm",		"../../../../resource/tex/sprite/celRamp_sm.png" },
 			{ demoState->tex_checker,		"tex:checker",		"../../../../resource/tex/sprite/checker.png" },
-			{ demoState->tex_pencil1,		"tex:pencil1",		"../../../../resource/tex/pencil/7-Figure7-1.png" },
+			{ demoState->tex_pencil1,		"tex:pencil1",		"../../../../resource/tex/pencil/strokes1.png" },
 			{ demoState->tex_pencil2,		"tex:pencil2",		"../../../../resource/tex/pencil/checker.png" },
 		}
 	};

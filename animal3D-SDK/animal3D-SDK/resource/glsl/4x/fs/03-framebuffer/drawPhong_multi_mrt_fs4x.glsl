@@ -43,6 +43,8 @@ uniform sampler2D uTex_sm;
 
 uniform sampler2D uImage02;
 
+uniform double uTime;
+
 
 // in position
 in vec4 viewSpacePos;
@@ -62,6 +64,18 @@ layout (location = 7) out vec4 specTotalOut;
 
 
 out vec4 rtFragColor;
+
+
+vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
+
+
+float fullAve(vec3 v1){
+	return (v1.x + v1.y + v1.z) / 3.0;
+}
+
+float sigmoid(float n, float slope, float threshold){
+	return 1.0 / (1.0 + exp(-slope * (n - threshold)));
+}
 
 
 void main()
@@ -89,8 +103,17 @@ void main()
 		colDiffuse += uLightCol[i].rgb * lighting;
 		colSpecular += uLightCol[i].rgb * specular;
 	}
-	
-	colorOut = vec4(max((colDiffuse * tex_out) + (colSpecular * tex_out_s), 0.0), 1.0);
+
+
+	float pencilMarks1 = texture(uImage02, texCoorVar.xy).r;
+
+	//colorOut = vec4(max((colDiffuse * tex_out) + (colSpecular * tex_out_s), 0.0), 1.0);
+
+	vec4 stripes = max(vec4(mix(vec3(pencilMarks1), vec3(1.0), sigmoid(fullAve(colDiffuse) + fullAve(colSpecular), 5.0, 0.8)), 1.0), 0.0);
+
+
+	colorOut = min(vec4(step(0.5, stripes.r) + tex_out, 1.0), 1.0);
+
 	
 	// view position
 	viewPosOut = viewSpacePos;
@@ -113,11 +136,5 @@ void main()
 	// specular total
 	specTotalOut = vec4(colSpecular, 1.0);
 
-	// pencil
-	float pencilDrawing = texture(uImage02, texCoorVar.xy).r;
-
-	colorOut.rgb = 1.0 - min(colorOut.rgb + pencilDrawing, 1.0);
-	colorOut.rgb *= (specTotalOut.rgb + diffTotalOut.rgb);
-	colorOut.rgb = 1.0 - colorOut.rgb;
 
 }

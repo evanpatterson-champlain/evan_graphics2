@@ -19,6 +19,8 @@ vec2 localLines[matrixSize];
 vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
 vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
 
+in vec4 absCoord;
+
 void main()
 {
 	// sample from line map
@@ -45,22 +47,21 @@ void main()
 					curDirection *= sign(curDirection.x);
 					direction += curDirection;
 				}
-
 			}
 		}
 
 		direction = normalize(direction);
 
 		// distance and direction are passed on
-		float absDistance = (cos((texCoorVar.x + texCoorVar.y) * 3.14159 * 50.0) + 1.0)/3.0;
+		float absDistance = (cos((texCoorVar.x + texCoorVar.y) * 3.14159 * 50.0) + 1.0) / 3.0;
+		//float absDistance = (cos((direction.x + direction.y) * 3.14159 * 5.0) + 1.0) / 3.0;
 		//float absDistance = 0.5;
 
 		rtFragColor = vec4(0.0, direction * absDistance, 1.0);
+		
 	}
 	else{
 		rtFragColor = vec4(1.0);
 	}
-
-	
 	
 }
