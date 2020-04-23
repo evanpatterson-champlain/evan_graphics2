@@ -42,13 +42,18 @@ uniform sampler2D uTex_dm;
 uniform sampler2D uTex_sm;
 
 uniform sampler2D uImage02;
+uniform sampler2D uImage03;
 
 uniform double uTime;
+
+uniform vec2 uSize;
 
 
 // in position
 in vec4 viewSpacePos;
 in vec4 normVar;
+
+in vec4 absolutePosition;
 
 // in texture
 in vec4 texCoorVar;
@@ -75,6 +80,11 @@ float fullAve(vec3 v1){
 
 float sigmoid(float n, float slope, float threshold){
 	return 1.0 / (1.0 + exp(-slope * (n - threshold)));
+}
+
+
+vec4 sigmoidMix(float n, vec3 diff, vec3 spec, float threshold){
+	return max(vec4(mix(vec3(n), vec3(1.0), sigmoid(fullAve(diff) + fullAve(spec), 5.0, threshold)), 1.0), 0.0);
 }
 
 
@@ -106,15 +116,21 @@ void main()
 
 
 	float pencilMarks1 = texture(uImage02, texCoorVar.xy).r;
+	float pencilMarks2 = texture(uImage02, texCoorVar.xy + (uSize * vec2(12.0, 16.0))).r;
+
+	float pencilSideways = texture(uImage03, texCoorVar.xy).r;
 
 	//colorOut = vec4(max((colDiffuse * tex_out) + (colSpecular * tex_out_s), 0.0), 1.0);
 
-	vec4 stripes = max(vec4(mix(vec3(pencilMarks1), vec3(1.0), sigmoid(fullAve(colDiffuse) + fullAve(colSpecular), 5.0, 0.8)), 1.0), 0.0);
+	vec4 stripes = sigmoidMix(pencilMarks1, colDiffuse, colSpecular, 0.8);
+	vec4 stripes2 = sigmoidMix(pencilMarks2, colDiffuse, colSpecular, 0.5);
+	vec4 stripesSideways = sigmoidMix(pencilSideways, colDiffuse, colSpecular, 0.3);
+
+	colorOut = min(vec4(step(0.5, stripes.r * stripes2.r * stripesSideways.r) + tex_out, 1.0), 1.0);
 
 
-	colorOut = min(vec4(step(0.5, stripes.r) + tex_out, 1.0), 1.0);
 
-	
+
 	// view position
 	viewPosOut = viewSpacePos;
 
@@ -135,6 +151,5 @@ void main()
 
 	// specular total
 	specTotalOut = vec4(colSpecular, 1.0);
-
 
 }

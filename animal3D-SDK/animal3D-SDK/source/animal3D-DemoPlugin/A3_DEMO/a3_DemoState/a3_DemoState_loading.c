@@ -636,8 +636,6 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_brightPass_fs->shader);
 	
-	// ****TO-DO: 
-	//	-> 3.1a: setup Gaussian blur program
 	
 	// texturing with Gaussian blurring
 	currentDemoProg = demoState->prog_drawTexture_blurGaussian;
@@ -645,8 +643,6 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blurGaussian_fs->shader);
 	
-	// ****TO-DO: 
-	//	-> 4.1a: setup screen blending program
 	
 	// texturing with bloom composition
 	currentDemoProg = demoState->prog_drawTexture_blendScreen4;
@@ -816,7 +812,7 @@ void a3demo_loadTextures(a3_DemoState* demoState)
 			{ demoState->tex_ramp_sm,		"tex:ramp-sm",		"../../../../resource/tex/sprite/celRamp_sm.png" },
 			{ demoState->tex_checker,		"tex:checker",		"../../../../resource/tex/sprite/checker.png" },
 			{ demoState->tex_pencil1,		"tex:pencil1",		"../../../../resource/tex/pencil/strokes1.png" },
-			{ demoState->tex_pencil2,		"tex:pencil2",		"../../../../resource/tex/pencil/checker.png" },
+			{ demoState->tex_pencil2,		"tex:pencil2",		"../../../../resource/tex/pencil/strokes2.png" },
 		}
 	};
 	const a3ui32 numTextures = sizeof(textureList) / sizeof(a3_DemoStateTexture);

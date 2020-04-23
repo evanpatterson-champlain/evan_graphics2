@@ -59,6 +59,9 @@ out vec4 texCoorVar;
 out vec4 viewPos_;
 
 
+out vec4 absolutePosition;
+
+
 void main()
 {
 	viewSpacePos = uMV * aPosition;
@@ -70,4 +73,6 @@ void main()
 	
 	//texture
 	texCoorVar = uAtlas * texCoor;
+
+	absolutePosition = aPosition;
 }

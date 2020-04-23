@@ -399,6 +399,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uLightSzInvSq, demoState->forwardLightCount, lightSzInvSq);
 		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uLightPos, demoState->forwardLightCount, lightPos->v);
 		a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uLightCol, demoState->forwardLightCount, lightCol->v);
+		a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+		a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 		a3textureActivate(demoState->tex_ramp_dm, a3tex_unit04);
 		a3textureActivate(demoState->tex_ramp_sm, a3tex_unit05);
 

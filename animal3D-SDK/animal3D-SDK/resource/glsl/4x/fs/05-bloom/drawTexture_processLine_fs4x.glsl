@@ -15,9 +15,6 @@ uniform vec2 uSize;
 vec4 iBasis = vec4(1.0, 0.0, 0.0, 0.0);
 vec4 jBasis = vec4(0.0, 1.0, 0.0, 0.0);
 
-//vec4 rot45Basis = vec4(0.70710678118, 0.70710678118, 0.0, 0.0);
-//vec4 rot135Basis = vec4(-0.70710678118, 0.70710678118, 0.0, 0.0);
-
 vec4 rot45Basis = vec4(1.0, 1.0, 0.0, 0.0);
 vec4 rot135Basis = vec4(-1.0, 1.0, 0.0, 0.0);
 
@@ -66,5 +63,5 @@ void main()
 	}
 
 	rtFragColor = vec4(vec3(lineModifier), 1.0);
-	
+
 }
