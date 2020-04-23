@@ -118,15 +118,15 @@ void main()
 
 	// sampling from pencil textures
 	float pencilMarks1 = texture(uImage02, texCoorVar.xy).r;
-	float pencilMarks2 = texture(uImage02, texCoorVar.xy + (uSize * vec2(12.0, 16.0))).r;
-	float pencilMarks3 = texture(uImage02, texCoorVar.xy + (uSize * vec2(-12.0, -16.0))).r;
+	float pencilMarks2 = texture(uImage02, texCoorVar.xy + (uSize * vec2(12.0, 16.0))).r; // shifted sampling
+	float pencilMarks3 = texture(uImage02, texCoorVar.xy + (uSize * vec2(-12.0, -16.0))).r; // shifted sampling
 	float pencilSideways1 = texture(uImage03, texCoorVar.xy).r;
-	float pencilSideways2 = texture(uImage03, texCoorVar.xy + (uSize * vec2(16.0, 12.0))).r;
-	float pencilSideways3 = texture(uImage03, texCoorVar.xy + (uSize * vec2(-18.0, 8.0))).r;
+	float pencilSideways2 = texture(uImage03, texCoorVar.xy + (uSize * vec2(16.0, 12.0))).r; // shifted sampling
+	float pencilSideways3 = texture(uImage03, texCoorVar.xy + (uSize * vec2(-18.0, 8.0))).r; // shifted sampling
 
 
 	// modify based on lights
-	vec4 stripes = sigmoidMix(pencilMarks1, colDiffuse, colSpecular, 0.95);
+	vec4 stripes1 = sigmoidMix(pencilMarks1, colDiffuse, colSpecular, 0.95);
 	vec4 stripes2 = sigmoidMix(pencilMarks2, colDiffuse, colSpecular, 0.8);
 	vec4 stripes3 = sigmoidMix(pencilMarks3, colDiffuse, colSpecular, 0.6);
 	vec4 stripesSideways1 = sigmoidMix(pencilSideways1, colDiffuse, colSpecular, 0.3);
@@ -134,7 +134,7 @@ void main()
 	vec4 stripesSideways3 = sigmoidMix(pencilSideways3, colDiffuse, colSpecular, 0.05);
 
 	// mix all the textures
-	colorOut = max(min(vec4(sigmoid(stripes.r * stripes2.r * stripes3.r * stripesSideways1.r * stripesSideways2.r * stripesSideways3.r, 10.0, 0.5) + tex_out, 1.0), 1.0), 0.0);
+	colorOut = max(min(vec4(sigmoid(stripes1.r * stripes2.r * stripes3.r * stripesSideways1.r * stripesSideways2.r * stripesSideways3.r, 10.0, 0.5) + tex_out, 1.0), 1.0), 0.0);
 
 
 
