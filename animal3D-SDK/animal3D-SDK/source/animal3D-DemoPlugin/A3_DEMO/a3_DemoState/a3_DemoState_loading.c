@@ -224,7 +224,7 @@ void a3demo_loadGeometry(a3_DemoState *demoState)
 		a3_ProceduralGeometryDescriptor hiddenShapes[1] = { a3geomShape_none };
 		a3_ProceduralGeometryDescriptor proceduralShapes[4] = { a3geomShape_none };
 		const a3_DemoStateLoadedModel loadedShapes[1] = {
-			{ A3_DEMO_OBJ"teapot/teapot.obj", downscale20x.mm, a3model_calculateVertexNormals_loadTexcoords }
+			{ A3_DEMO_OBJ"teapot/teapot.obj", downscale20x.mm, a3model_calculateVertexTangents }
 		};
 
 		const a3ubyte lightVolumeSlices = 8, lightVolumeStacks = 6;
@@ -254,10 +254,10 @@ void a3demo_loadGeometry(a3_DemoState *demoState)
 		}
 
 		// other procedurally-generated objects
-		a3proceduralCreateDescriptorPlane(proceduralShapes + 0, a3geomFlag_texcoords_normals, a3geomAxis_default, 24.0f, 24.0f, 12, 12);
-		a3proceduralCreateDescriptorSphere(proceduralShapes + 1, a3geomFlag_texcoords_normals, a3geomAxis_default, 1.0f, 32, 24);
-		a3proceduralCreateDescriptorCylinder(proceduralShapes + 2, a3geomFlag_texcoords_normals, a3geomAxis_x, 1.0f, 2.0f, 32, 1, 1);
-		a3proceduralCreateDescriptorTorus(proceduralShapes + 3, a3geomFlag_texcoords_normals, a3geomAxis_x, 1.0f, 0.25f, 32, 24);
+		a3proceduralCreateDescriptorPlane(proceduralShapes + 0, a3geomFlag_tangents, a3geomAxis_default, 24.0f, 24.0f, 12, 12);
+		a3proceduralCreateDescriptorSphere(proceduralShapes + 1, a3geomFlag_tangents, a3geomAxis_default, 1.0f, 32, 24);
+		a3proceduralCreateDescriptorCylinder(proceduralShapes + 2, a3geomFlag_tangents, a3geomAxis_x, 1.0f, 2.0f, 32, 1, 1);
+		a3proceduralCreateDescriptorTorus(proceduralShapes + 3, a3geomFlag_tangents, a3geomAxis_x, 1.0f, 0.25f, 32, 24);
 		for (i = 0; i < proceduralShapesCount; ++i)
 		{
 			a3proceduralGenerateGeometryData(proceduralShapesData + i, proceduralShapes + i, 0);
@@ -450,6 +450,13 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 				drawTexture_brightPass_fs[1],
 				drawTexture_blurGaussian_fs[1],
 				drawTexture_blendScreen4_fs[1];
+
+			// final-image
+			a3_DemoStateShader 
+				drawTexture_voronoi_fs[1], 
+				drawTexture_voronoiMix_fs[1];
+
+			// final-lines
 			a3_DemoStateShader 
 				drawTexture_processLine_fs[1],
 				drawTexture_findDirection_fs[1],
@@ -489,7 +496,10 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-tex-colormanip",		a3shader_fragment,	1,{ A3_DEMO_FS"03-framebuffer/drawTexture_colorManip_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-coordmanip",		a3shader_fragment,	1,{ A3_DEMO_FS"03-framebuffer/drawTexture_coordManip_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-Lambert-multi-mrt",	a3shader_fragment,	1,{ A3_DEMO_FS"03-framebuffer/drawLambert_multi_mrt_fs4x.glsl" } } },
+
+			// phong used for the final
 			{ { { 0 },	"shdr-fs:draw-Phong-multi-mrt",		a3shader_fragment,	1,{ A3_DEMO_FS"03-framebuffer/drawPhong_multi_mrt_fs4x.glsl" } } },
+
 			{ { { 0 },	"shdr-fs:draw-nonphoto-multi-mrt",	a3shader_fragment,	1,{ A3_DEMO_FS"03-framebuffer/drawNonphoto_multi_mrt_fs4x.glsl" } } },
 			// 04-multipass
 			{ { { 0 },	"shdr-fs:draw-tex-outline",			a3shader_fragment,	1,{ A3_DEMO_FS"04-multipass/drawTexture_outline_fs4x.glsl" } } },
@@ -498,10 +508,18 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-tex-bright",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_brightPass_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blur",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blurGaussian_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-blend4",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_blendScreen4_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_processLine_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_findDirection_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_distortLine_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex-fin",			a3shader_fragment,	1,{ A3_DEMO_FS"05-bloom/drawTexture_finalBlend_fs4x.glsl" } } },
+
+			// final main image
+			{ { { 0 },	"shdr-fs:draw-tex-vor",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_voronoi_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-vor-mix",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_voronoiBasedMix_fs4x.glsl" } } },
+
+			// final lines
+			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_processLine_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-lin2",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_findDirection_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-lin3",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_distortLine_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-fin",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_finalBlend_fs4x.glsl" } } },
+
+
 		}
 	};
 	a3_DemoStateShader *const shaderListPtr = (a3_DemoStateShader *)(&shaderList), *shaderPtr;
@@ -651,6 +669,19 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blendScreen4_fs->shader);
 
 
+	// final
+	currentDemoProg = demoState->prog_drawTexture_voronoi;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-vor");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_voronoi_fs->shader);
+
+	currentDemoProg = demoState->prog_drawTexture_voronoiMix;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-tex-vor-mix");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_voronoiMix_fs->shader);
+
+
+	// final line stuff
 	currentDemoProg = demoState->prog_drawTexture_processLine;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-line");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
@@ -661,13 +692,11 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_findDirection_fs->shader);
 
-
 	currentDemoProg = demoState->prog_drawTexture_distortLine;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-dist-line");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_distortLine_fs->shader);
 	
-
 	currentDemoProg = demoState->prog_drawTexture_finalBlend;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-final");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
@@ -895,6 +924,15 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 		0, a3fbo_colorDisable, depthType_shadow,
 		shadowMapSz, shadowMapSz);
 
+	fbo = demoState->fbo_voronoi + 0;
+	a3framebufferCreate(fbo, "fbo:voronoi",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
+	fbo = demoState->fbo_voronoiMix + 0;
+	a3framebufferCreate(fbo, "fbo:voronoi-mix",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
 
 	fbo = demoState->fbo_processLine + 0;
 	a3framebufferCreate(fbo, "fbo:line",

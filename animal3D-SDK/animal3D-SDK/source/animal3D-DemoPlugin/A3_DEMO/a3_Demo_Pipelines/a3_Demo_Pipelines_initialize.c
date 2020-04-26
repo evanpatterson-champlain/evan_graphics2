@@ -78,7 +78,11 @@ void a3pipelines_init(a3_DemoState const* demoState, a3_Demo_Pipelines* demoMode
 	demoMode->targetCount[pipelines_passBlurV_8] = pipelines_target_blur_max;
 	demoMode->targetCount[pipelines_passBlend] = pipelines_target_display_max;
 	*/
+	demoMode->targetCount[pipelines_voronoi] = 1;
+	demoMode->targetCount[pipelines_voronoiMix] = 1;
 	demoMode->targetCount[pipelines_processLine] = 1;
+	demoMode->targetCount[pipelines_findDirection] = 1;
+	demoMode->targetCount[pipelines_distortLine] = 1;
 	demoMode->targetCount[pipelines_finalBlend] = 1;
 }
 

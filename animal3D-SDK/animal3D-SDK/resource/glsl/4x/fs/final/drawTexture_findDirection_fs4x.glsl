@@ -29,7 +29,7 @@ void main()
 	vec4 thisPoint = texture(uImage00, texCoorVar.xy);
 
 
-	
+	/*
 	if(thisPoint.x == 0.0){
 		int matrixIndex;
 		for(int i = 0; i < matrixDimension; i++) {
@@ -62,7 +62,9 @@ void main()
 	else{
 		rtFragColor = vec4(1.0);
 	}
+	*/
 
+	rtFragColor = red;
 
 	
 }

@@ -35,7 +35,7 @@ void main()
 {
 	rtFragColor = white;
 
-
+	/*
 	//if(texture(uImage00, texCoorVar.xy).r != 0.0){
 	// sampling all around to see if there are lines to copy from
 	int matrixIndex;
@@ -69,7 +69,9 @@ void main()
 			}
 		}
 	}
+	*/
 
+	rtFragColor = green;
 	
 
 	

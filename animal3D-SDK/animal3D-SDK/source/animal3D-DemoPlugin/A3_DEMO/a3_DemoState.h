@@ -309,6 +309,9 @@ extern "C"
 					prog_drawTexture_brightPass[1],				// draw texture with bright-pass or tone-mapping
 					prog_drawTexture_blurGaussian[1],			// draw texture with Gaussian blurring
 					prog_drawTexture_blendScreen4[1];
+				a3_DemoStateShaderProgram 
+					prog_drawTexture_voronoi[1],
+					prog_drawTexture_voronoiMix[1];
 				a3_DemoStateShaderProgram
 					prog_drawTexture_processLine[1],
 					prog_drawTexture_findDirection[1],
@@ -348,8 +351,6 @@ extern "C"
 				a3_Framebuffer
 					fbo_shadow_d32[1];							// framebuffer for capturing shadow map
 				a3_Framebuffer
-					// ****TO-DO: 
-					//	-> 2.1a: uncomment post-processing framebuffers
 
 					fbo_post_c16_2fr[3],						// framebuffers for post-processing, half frame size
 					fbo_post_c16_4fr[3],						// framebuffers for post-processing, quarter frame size
@@ -359,6 +360,9 @@ extern "C"
 
 
 					// evan stuff
+					fbo_voronoi[1],
+					fbo_voronoiMix[1],
+
 					fbo_processLine[1],
 					fbo_findDirection[1],
 					fbo_distortLine[1],

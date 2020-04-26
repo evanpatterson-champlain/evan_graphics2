@@ -79,6 +79,8 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Pass: Capture shadow map",
 		"Pass: Render scene objects",
 		"Pass: Composite scene",
+		"Pass: Voronoi",
+		"Pass: Voronoi Mix",
 		"Pass: Lines",
 		"Pass: Find Direction",
 		"Pass: Distort Line",
@@ -101,6 +103,12 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 	a3byte const* targetText_composite[pipelines_target_composite_max] = {
 		"Color target 0: FINAL DISPLAY COLOR",
 	};
+	a3byte const* targetText_voronoi[pipelines_target_composite_max] = {
+		"Color target 0: Voronoi",
+	};
+	a3byte const* targetText_voronoiMix[pipelines_target_composite_max] = {
+		"Color target 0: Voronoi Final display color",
+	};
 	a3byte const* targetText_bright[pipelines_target_bright_max] = {
 		"Color target 0: FINAL DISPLAY COLOR",
 		"Color target 1: Luminance",
@@ -121,6 +129,8 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		targetText_shadow,
 		targetText_scene,
 		targetText_composite,
+		targetText_voronoi,
+		targetText_voronoiMix,
 		targetText_lines,
 		targetText_lines,
 		targetText_lines,
@@ -249,10 +259,12 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->fbo_shadow_d32,
 		demoState->fbo_scene_c16d24s8_mrt,
 		demoState->fbo_composite_c16 + 2,
-		demoState->fbo_processLine + 0,
-		demoState->fbo_findDirection + 0,
-		demoState->fbo_distortLine + 0,
-		demoState->fbo_finalBlend + 0
+		demoState->fbo_voronoi,
+		demoState->fbo_voronoiMix,
+		demoState->fbo_processLine,
+		demoState->fbo_findDirection,
+		demoState->fbo_distortLine,
+		demoState->fbo_finalBlend
 	};
 
 	// framebuffers from which to read based on pipeline mode
@@ -260,10 +272,12 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		{ 0, },
 		{ 0, demoState->fbo_shadow_d32, 0, },
 		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
+		{ 0, },
+		{ demoState->fbo_voronoi, demoState->fbo_composite_c16 + 2, 0, },
 		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
 		{ demoState->fbo_processLine, 0, },
 		{ demoState->fbo_findDirection, 0, },
-		{ demoState->fbo_composite_c16 + 2, demoState->fbo_distortLine, }
+		{ demoState->fbo_voronoiMix, demoState->fbo_distortLine, }
 	};
 
 	// target info
@@ -476,12 +490,46 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 
 
 
+	currentDemoProgram = demoState->prog_drawTexture_voronoi;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	double myTime = demoState->renderTimer->totalTime;
+	printf("%f \n", myTime);
+
+	currentPass = pipelines_voronoi;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->renderTimer->totalTime);
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3vertexDrawableRenderActive();
+
+
+
+	currentDemoProgram = demoState->prog_drawTexture_voronoiMix;
+	a3shaderProgramActivate(currentDemoProgram->program);
+
+	currentPass = pipelines_voronoiMix;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->renderTimer->totalTime);
+	currentWriteFBO = writeFBO[currentPass];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(readFBO[currentPass][0], a3tex_unit00, 0);
+	a3framebufferBindColorTexture(readFBO[currentPass][1], a3tex_unit01, 0);
+	a3vertexDrawableRenderActive();
+
+
+
+
 	currentDemoProgram = demoState->prog_drawTexture_processLine;
 	a3shaderProgramActivate(currentDemoProgram->program);
 
 	currentPass = pipelines_processLine;
 	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->renderTimer->totalTime);
 	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
@@ -561,6 +609,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 			a3framebufferBindDepthTexture(currentDisplayFBO, a3tex_unit00);
 		break;
 	case pipelines_passComposite:
+	case pipelines_voronoi:
+	case pipelines_voronoiMix:
 	case pipelines_processLine:
 	case pipelines_findDirection:
 	case pipelines_distortLine:
@@ -568,7 +618,6 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
 		break;
 	}
-
 
 	// final display: activate desired final program and draw FSQ
 	if (currentDisplayFBO)

@@ -18,7 +18,7 @@ vec4 jBasis = vec4(0.0, 1.0, 0.0, 0.0);
 vec4 rot45Basis = vec4(1.0, 1.0, 0.0, 0.0);
 vec4 rot135Basis = vec4(-1.0, 1.0, 0.0, 0.0);
 
-vec2 lineSize = uSize;//0.005;
+vec2 lineSize = uSize;
 float tolerance = 0.002;
 
 
@@ -62,6 +62,9 @@ void main()
 		lineModifier = 0.0;
 	}
 
-	rtFragColor = vec4(vec3(lineModifier), 1.0);
+	rtFragColor = vec4(0.0, 0.0, 1.0, 1.0);//vec4(vec3(lineModifier), 1.0);
+
+
+	//rtFragColor = vec4(vec3(cos(texCoorVar.x * 40.0 * 3.14159) + 1.0, cos(texCoorVar.y * 40.0 * 3.14159) + 1.0, 0.5), 1.0);
 
 }

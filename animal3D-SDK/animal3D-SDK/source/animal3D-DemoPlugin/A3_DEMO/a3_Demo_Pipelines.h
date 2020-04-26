@@ -109,6 +109,9 @@ extern "C"
 		pipelines_passBlend,			// bloom composite pass
 		*/
 
+		pipelines_voronoi,
+		pipelines_voronoiMix,
+
 		pipelines_processLine,
 		pipelines_findDirection,
 		pipelines_distortLine,
