@@ -31,8 +31,9 @@
 //	3) sample texture using Gaussian blur function and output result
 
 uniform sampler2D uImage00;
+uniform sampler2D uImage01;
 
-uniform vec2 uAxis;
+
 uniform vec2 uSize;
 
 
@@ -41,66 +42,35 @@ in vec4 texCoorVar;
 
 layout (location = 0) out vec4 rtFragColor;
 
+int matrixDimension = 6;
 
 
-
-
-const int numbOfColors = 9;
-
-
-vec3 outColors[numbOfColors];
-float weights[numbOfColors];
-
-
-
-float MultiplyBySelf(float num, int p){
-	for(int i = 0; i < p; i++){
-		num *= num;
-	}
-	return num;
+vec3 getImage00(vec2 coord){
+	return texture(uImage00, coord).rgb;
 }
 
-
-vec4 Add(vec4 lhs, vec2 rhs){
-	return vec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z, lhs.w);
+vec3 getImage01(vec2 coord){
+	return texture(uImage01, coord).rgb;
 }
-
-
-void InitWeights(){
-	weights[0] = 70;
-	weights[1] = 56;
-	weights[2] = 56;
-	weights[3] = 28;
-	weights[4] = 28;
-	weights[5] = 8;
-	weights[6] = 8;
-	weights[7] = 1;
-	weights[8] = 1;
-}
-
-
-vec3 GenerateColors(vec4 textureCoordinates, vec2 offset){
-	for(int i = 0; i < numbOfColors; i++){
-		float n = float(i);
-		vec2 offsetCur = offset * floor((n + 1.0) / 2.0);
-		if(i % 2 == 0){
-			offsetCur *= -1.0;
-		}
-		outColors[i] = textureProj(uImage00, min(max(Add(textureCoordinates, offsetCur), 0.0), 1.0)).rgb * weights[i];
-	}
-	vec3 sum = vec3(0.0);
-	for(int i = 0; i < numbOfColors; i++){
-		sum += outColors[i];
-	}
-	return sum;
-}
-
-
 
 
 void main()
 {
-	InitWeights();
-	vec3 outColor = GenerateColors(texCoorVar, uAxis * uSize);
-	rtFragColor = vec4(1.0, 0.0, 1.0, 1.0);//vec4(outColor/MultiplyBySelf(2.0, 3), 1.0);
+
+	vec3 myId = getImage00(texCoorVar.xy);
+	float n = 0;
+	vec3 aveColor = vec3(0.0);
+	for(int i = -matrixDimension; i <= matrixDimension; i++) {
+		for(int j = -matrixDimension; j <= matrixDimension; j++) {
+			vec2 offset = texCoorVar.xy + (uSize * vec2(i, j));
+			if(myId == getImage00(offset)){
+				n+=1;
+				aveColor += getImage01(offset);
+			}
+		}
+	}
+
+	//also try gaussian blur but on neighboring cells
+
+	rtFragColor = vec4(aveColor/n, 1.0);
 }

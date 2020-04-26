@@ -493,9 +493,6 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	currentDemoProgram = demoState->prog_drawTexture_voronoi;
 	a3shaderProgramActivate(currentDemoProgram->program);
 
-	double myTime = demoState->renderTimer->totalTime;
-	printf("%f \n", myTime);
-
 	currentPass = pipelines_voronoi;
 	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
