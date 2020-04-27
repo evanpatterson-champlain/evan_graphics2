@@ -265,5 +265,11 @@
     <None Include="..\..\..\resource\glsl\4x\fs\final\drawTexture_voronoiBasedMix_fs4x.glsl">
       <Filter>Resource Files\A3_DEMO\glsl\4x\fs\final</Filter>
     </None>
+    <None Include="..\..\..\resource\glsl\4x\fs\final\drawTexture_blurLine_fs4x.glsl">
+      <Filter>Resource Files\A3_DEMO\glsl\4x\fs\final</Filter>
+    </None>
+    <None Include="..\..\..\resource\glsl\4x\fs\final\drawTexture_blurLine2_fs4x.glsl">
+      <Filter>Resource Files\A3_DEMO\glsl\4x\fs\final</Filter>
+    </None>
   </ItemGroup>
 </Project>

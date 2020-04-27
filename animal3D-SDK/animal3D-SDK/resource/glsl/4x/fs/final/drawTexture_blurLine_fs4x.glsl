@@ -2,6 +2,7 @@
 
 #version 410
 
+
 layout (location = 0) out vec4 rtFragColor;
 
 uniform double uTime;
@@ -13,7 +14,6 @@ vec2 hash( vec2 p ) {
 	p = vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));
 	return fract(sin(p)*18.5453); 
 }
-
 
 float voronoi( in vec2 x )
 {
@@ -46,7 +46,9 @@ float voronoi( in vec2 x )
 void main()
 {
     
-    float c = voronoi(((1.0/(uSize.x * 4.0)) + sin(float(uTime))) * texCoorVar.xy);
+    float c = voronoi(((1.0/(uSize.x * 5.0)) + sin(float(uTime))) * texCoorVar.xy);
 	
     rtFragColor = vec4(vec3(c)/2.0, 1.0 );
 }
+
+

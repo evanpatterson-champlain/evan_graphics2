@@ -316,6 +316,8 @@ extern "C"
 					prog_drawTexture_processLine[1],
 					prog_drawTexture_findDirection[1],
 					prog_drawTexture_distortLine[1],
+					prog_drawTexture_blurLine[1],
+					prog_drawTexture_blurLine2[1],
 					prog_drawTexture_finalBlend[1];
 			};
 		};
@@ -366,6 +368,8 @@ extern "C"
 					fbo_processLine[1],
 					fbo_findDirection[1],
 					fbo_distortLine[1],
+					fbo_blurLine[1],
+					fbo_blurLine2[1],
 					fbo_finalBlend[1];
 			};
 		};

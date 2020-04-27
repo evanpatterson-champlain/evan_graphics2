@@ -35,6 +35,16 @@ vec2 getNormal(){
 	return texture(uImage01, texCoorVar.xy).rg;
 }
 
+vec2 passNormal(float difference, vec4 loc, float camDist, vec2 normal){
+	vec2 newNormal = abs(1.0 - difference) * step(camDist - textureProj(uImage00, loc).x, 0.0) * getNormal();
+	if(normal == vec2(0.0)){
+		return newNormal;
+	}
+	else{
+		return normal;
+	}
+}
+
 
 void main()
 {
@@ -67,56 +77,14 @@ void main()
 
 	vec2 normalAngle = vec2(0.0);
 
-	if(rightDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, rightLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
-	if(leftDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, leftLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
-	if(upDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, upLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
-	if(downDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, downLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-	
-	//
-	if(topRightDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, topRightLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
-	if(topLeftDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, topLeftLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
-	if(bottonRightDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, bottonRightLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
-	if(bottomLeftDiff == 0.0){
-		if(camDistance.x - textureProj(uImage00, bottomLeftLoc).x < 0){
-			normalAngle = getNormal();
-		}
-	}
-
+	normalAngle = passNormal(rightDiff, rightLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(leftDiff, leftLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(upDiff, upLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(downDiff, downLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(topRightDiff, topRightLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(topLeftDiff, topLeftLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(bottonRightDiff, bottonRightLoc, camDistance.x, normalAngle);
+	normalAngle = passNormal(bottomLeftDiff, bottomLeftLoc, camDistance.x, normalAngle);
 
 	rtFragColor = vec4(lineModifier, normalAngle, 1.0);
-
 }

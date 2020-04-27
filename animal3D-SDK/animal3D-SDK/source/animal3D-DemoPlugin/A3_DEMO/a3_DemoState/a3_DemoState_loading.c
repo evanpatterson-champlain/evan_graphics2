@@ -461,6 +461,8 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 				drawTexture_processLine_fs[1],
 				drawTexture_findDirection_fs[1],
 				drawTexture_distortLine_fs[1],
+				drawTexture_blurLine_fs[1],
+				drawTexture_blurLine2_fs[1],
 				drawTexture_finalBlend_fs[1];
 		};
 	} shaderList = {
@@ -517,6 +519,8 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-tex-lin",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_processLine_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-lin2",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_findDirection_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-lin3",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_distortLine_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-blurline-1",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_blurLine_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex-blurline-2",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_blurLine2_fs4x.glsl" } } },
 			{ { { 0 },	"shdr-fs:draw-tex-fin",			a3shader_fragment,	1,{ A3_DEMO_FS"final/drawTexture_finalBlend_fs4x.glsl" } } },
 
 
@@ -696,6 +700,16 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-dist-line");
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
 	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_distortLine_fs->shader);
+
+	currentDemoProg = demoState->prog_drawTexture_blurLine;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-blur-line");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blurLine_fs->shader);
+
+	currentDemoProg = demoState->prog_drawTexture_blurLine2;
+	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-blur-line2");
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.passTexcoord_transform_vs->shader);
+	a3shaderProgramAttachShader(currentDemoProg->program, shaderList.drawTexture_blurLine2_fs->shader);
 	
 	currentDemoProg = demoState->prog_drawTexture_finalBlend;
 	a3shaderProgramCreate(currentDemoProg->program, "prog:draw-final");
@@ -948,6 +962,17 @@ void a3demo_loadFramebuffers(a3_DemoState* demoState)
 	a3framebufferCreate(fbo, "fbo:distort-line",
 		targets_composite, colorType_composite, a3fbo_depthDisable,
 		frameWidth1, frameHeight1);
+
+	fbo = demoState->fbo_blurLine + 0;
+	a3framebufferCreate(fbo, "fbo:blur-line",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
+	fbo = demoState->fbo_blurLine2 + 0;
+	a3framebufferCreate(fbo, "fbo:blur-line-2",
+		targets_composite, colorType_composite, a3fbo_depthDisable,
+		frameWidth1, frameHeight1);
+
 
 	fbo = demoState->fbo_finalBlend + 0;
 	a3framebufferCreate(fbo, "fbo:final",

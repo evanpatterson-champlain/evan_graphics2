@@ -84,6 +84,8 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		"Pass: Lines",
 		"Pass: Find Direction",
 		"Pass: Distort Line",
+		"Pass: Blur Line 1",
+		"Pass: Blur Line 2",
 		"Pass: Final"
 	};
 	a3byte const* targetText_shadow[pipelines_target_shadow_max] = {
@@ -131,6 +133,8 @@ void a3pipelines_render_controls(a3_DemoState const* demoState, a3_Demo_Pipeline
 		targetText_composite,
 		targetText_voronoi,
 		targetText_voronoiMix,
+		targetText_lines,
+		targetText_lines,
 		targetText_lines,
 		targetText_lines,
 		targetText_lines,
@@ -264,6 +268,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		demoState->fbo_processLine,
 		demoState->fbo_findDirection,
 		demoState->fbo_distortLine,
+		demoState->fbo_blurLine,
+		demoState->fbo_blurLine2,
 		demoState->fbo_finalBlend
 	};
 
@@ -277,7 +283,9 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 		{ demoState->fbo_scene_c16d24s8_mrt, 0, },
 		{ demoState->fbo_processLine, 0, },
 		{ demoState->fbo_findDirection, 0, },
-		{ demoState->fbo_voronoiMix, demoState->fbo_distortLine, }
+		{ demoState->fbo_distortLine, 0, },
+		{ demoState->fbo_blurLine, demoState->fbo_distortLine, 0, },
+		{ demoState->fbo_voronoiMix, demoState->fbo_blurLine2, 0, }
 	};
 
 	// target info
@@ -559,12 +567,36 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
 	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
 	currentWriteFBO = writeFBO[currentPass];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(readFBO[currentPass][0], a3tex_unit00, 0);
+	a3vertexDrawableRenderActive();
+
+
+
+	currentDemoProgram = demoState->prog_drawTexture_blurLine;
+	a3shaderProgramActivate(currentDemoProgram->program);
+	currentPass = pipelines_blurLine;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+	currentWriteFBO = writeFBO[currentPass];
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
 	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit00, 0);
 	a3vertexDrawableRenderActive();
 
 
+
+	currentDemoProgram = demoState->prog_drawTexture_blurLine2;
+	a3shaderProgramActivate(currentDemoProgram->program);
+	currentPass = pipelines_blurLine2;
+	a3real2Set(pixelSize.v, a3recip((a3real)currentWriteFBO->frameWidth), a3recip((a3real)currentWriteFBO->frameHeight));
+	a3shaderUniformSendFloat(a3unif_vec2, currentDemoProgram->uSize, 1, pixelSize.v);
+	currentWriteFBO = writeFBO[currentPass];
+	currentReadFBO = readFBO[currentPass][0];
+	a3framebufferActivate(currentWriteFBO);
+	a3framebufferBindColorTexture(readFBO[currentPass][0], a3tex_unit00, 0);
+	a3framebufferBindColorTexture(readFBO[currentPass][1], a3tex_unit01, 0);
+	a3vertexDrawableRenderActive();
 
 
 
@@ -612,6 +644,8 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	case pipelines_processLine:
 	case pipelines_findDirection:
 	case pipelines_distortLine:
+	case pipelines_blurLine:
+	case pipelines_blurLine2:
 	case pipelines_finalBlend:
 		a3framebufferBindColorTexture(currentDisplayFBO, a3tex_unit00, targetIndex);
 		break;

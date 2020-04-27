@@ -115,6 +115,8 @@ extern "C"
 		pipelines_processLine,
 		pipelines_findDirection,
 		pipelines_distortLine,
+		pipelines_blurLine,
+		pipelines_blurLine2,
 		pipelines_finalBlend,
 
 		pipelines_pass_max
