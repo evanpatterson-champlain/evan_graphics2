@@ -21,7 +21,7 @@ float halfDimension = float(matrixDimension) / 2.0;
 vec4 localSamples;
 
 
-float similarity = 0.1;
+float similarity = 0.95;
 float distRange = 0.2;
 
 
@@ -31,48 +31,41 @@ vec4 white = vec4(1.0);
 vec4 black = vec4(vec3(0.0), 1.0);
 
 
+
+
 void main()
 {
 	rtFragColor = white;
 
-	/*
-	//if(texture(uImage00, texCoorVar.xy).r != 0.0){
+	distRange = 0.3 + (cos((texCoorVar.x) * 3.14159 * 50.0) * 0.1);
 	// sampling all around to see if there are lines to copy from
 	int matrixIndex;
 	for(int i = 0; i < matrixDimension; i++) {
 		for(int j = 0; j < matrixDimension; j++) {
 			matrixIndex = (i * matrixDimension) + j;
-			localSamples = texture(uImage00, texCoorVar.xy + (uSize * vec2(i - middleValue, j - middleValue)));
+			vec2 otherloc = texCoorVar.xy + (uSize * vec2(i - middleValue, j - middleValue));
+			localSamples = texture(uImage00, otherloc);
 			if(localSamples.r == 0.0) { // if sampled pixel is on a line
 				
 
-				vec2 otherVector = localSamples.gb;
 				vec2 thisVector = vec2(i - middleValue, j - middleValue);
 				
 				
-				vec2 otherDirection = normalize(localSamples.gb);
+				vec2 otherDirection = normalize((localSamples.gb * 2.0)-1.0);
 				vec2 thisDirection = normalize(thisVector);
 
-				float otherDist = length(otherVector);
+				float otherDist = cos((otherloc.x + otherloc.y) * 3.14159 * 30.0) * 0.45;
 				float thisDist = length(thisVector);
 
+				float dotProduct = dot(otherDirection, thisDirection);
+				float distanceDifference = abs(abs(otherDist) - (thisDist/halfDimension));
 
-
-				float dotProduct = abs(dot(otherDirection, thisDirection));
-				float distanceDifference = abs(otherDist - (thisDist/halfDimension));
-
-
-				if(distanceDifference < distRange && dotProduct < similarity){
+				if(distanceDifference < distRange && (-sign(otherDist) * dotProduct) > similarity){
 					rtFragColor = black;
 				}
 
 			}
 		}
 	}
-	*/
-
-	rtFragColor = green;
-	
-
 	
 }

@@ -25,19 +25,6 @@
 
 #version 410
 
-// ****TO-DO: 
-//	1) declare uniform variable for MV matrix; see demo code for hint
-//	2) declare view position as outbound varying
-//	3) correctly transform input position by MV matrix to get view position
-//	4) declare uniform variable for P matrix; see demo code for hint
-//	5) correctly transform view position by P matrix to get final position
-//	6) declare normal attribute; see renderer library for location
-//	7) declare MV matrix for normals; see demo code for hint
-//	8) declare outbound normal
-//	9) correctly transform input normal by MV normal matrix
-//	10+) see instructions in passTexcoord...vs4x.glsl for information on 
-//		how to handle the texture coordinate
-
 layout (location = 0) in vec4 aPosition;
 
 uniform mat4 uMV;
@@ -54,6 +41,9 @@ out vec4 normVar;
 layout (location = 8) in vec4 texCoor;
 uniform mat4 uAtlas;
 out vec4 texCoorVar;
+
+
+layout (location = 10) in vec4 tangIn;
 
 
 out vec4 viewPos_;

@@ -18,7 +18,7 @@ uniform vec2 uSize;
 in vec4 texCoorVar;
 
 vec2 hash( vec2 p ) { 
-	p = vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))); 
+	p = vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));
 	return fract(sin(p)*18.5453); 
 }
 

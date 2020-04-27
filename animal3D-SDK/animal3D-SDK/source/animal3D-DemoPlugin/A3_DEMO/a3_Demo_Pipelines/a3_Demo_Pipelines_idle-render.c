@@ -531,6 +531,7 @@ void a3pipelines_render(a3_DemoState const* demoState, a3_Demo_Pipelines const* 
 	currentReadFBO = readFBO[currentPass][0];
 	a3framebufferActivate(currentWriteFBO);
 	a3framebufferBindDepthTexture(currentReadFBO, a3tex_unit00);
+	a3framebufferBindColorTexture(currentReadFBO, a3tex_unit01, 2);
 	a3vertexDrawableRenderActive();
 	
 

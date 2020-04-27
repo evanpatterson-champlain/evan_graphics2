@@ -24,11 +24,6 @@
 
 #version 410
 
-// ****TO-DO: 
-//	0) copy existing texturing shader
-//	1) declare uniforms for pixel size and sampling axis
-//	2) implement Gaussian blur function using a 1D kernel (hint: Pascal's triangle)
-//	3) sample texture using Gaussian blur function and output result
 
 uniform sampler2D uImage00;
 uniform sampler2D uImage01;

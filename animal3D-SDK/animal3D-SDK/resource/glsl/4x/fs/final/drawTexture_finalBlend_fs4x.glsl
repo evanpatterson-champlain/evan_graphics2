@@ -19,5 +19,5 @@ void main()
 
 	vec4 colorOut = v1 * v2.x;
 
-	rtFragColor = vec4(0.0, 1.0, 1.0, 1.0);//colorOut;
+	rtFragColor = colorOut;
 }

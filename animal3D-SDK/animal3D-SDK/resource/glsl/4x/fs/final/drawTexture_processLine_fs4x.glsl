@@ -4,6 +4,7 @@
 
 
 uniform sampler2D uImage00;
+uniform sampler2D uImage01;
 
 layout (location = 0) out vec4 rtFragColor;
 
@@ -22,8 +23,16 @@ vec2 lineSize = uSize;
 float tolerance = 0.002;
 
 
+
+vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
+
+
 vec4 multiply(vec4 v4, vec2 v2){
 	return vec4(v4.x * v2.x, v4.y * v2.y, v4.z, v4.w);
+}
+
+vec2 getNormal(){
+	return texture(uImage01, texCoorVar.xy).rg;
 }
 
 
@@ -37,10 +46,10 @@ void main()
 	vec4 upLoc = texCoorVar + multiply(jBasis, lineSize);
 	vec4 downLoc = texCoorVar - multiply(jBasis, lineSize);
 
-	bool rightDiff = (camDistance.x - textureProj(uImage00, rightLoc).x) > tolerance;
-	bool leftDiff = (camDistance.x - textureProj(uImage00, leftLoc).x) > tolerance;
-	bool upDiff = (camDistance.x - textureProj(uImage00, upLoc).x) > tolerance;
-	bool downDiff = (camDistance.x - textureProj(uImage00, downLoc).x) > tolerance;
+	float rightDiff = step(abs(camDistance.x - textureProj(uImage00, rightLoc).x),		tolerance);
+	float leftDiff	= step(abs(camDistance.x - textureProj(uImage00, leftLoc).x),		tolerance);
+	float upDiff	= step(abs(camDistance.x - textureProj(uImage00, upLoc).x),		tolerance);
+	float downDiff	= step(abs(camDistance.x - textureProj(uImage00, downLoc).x),		tolerance);
 
 
 	vec4 topRightLoc = texCoorVar + multiply(rot45Basis, lineSize);
@@ -48,23 +57,66 @@ void main()
 	vec4 bottonRightLoc = texCoorVar - multiply(rot135Basis, lineSize);
 	vec4 bottomLeftLoc = texCoorVar - multiply(rot45Basis, lineSize);
 
-	bool topRightDiff = (camDistance.x - textureProj(uImage00, topRightLoc).x) > tolerance;
-	bool topLeftDiff = (camDistance.x - textureProj(uImage00, topLeftLoc).x) > tolerance;
-	bool bottonRightDiff = (camDistance.x - textureProj(uImage00, bottonRightLoc).x) > tolerance;
-	bool bottomLeftDiff = (camDistance.x - textureProj(uImage00, bottomLeftLoc).x) > tolerance;
+	float topRightDiff			= step(abs(camDistance.x - textureProj(uImage00, topRightLoc).x),		tolerance);
+	float topLeftDiff			= step(abs(camDistance.x - textureProj(uImage00, topLeftLoc).x),		tolerance);
+	float bottonRightDiff		= step(abs(camDistance.x - textureProj(uImage00, bottonRightLoc).x),	tolerance);
+	float bottomLeftDiff		= step(abs(camDistance.x - textureProj(uImage00, bottomLeftLoc).x),		tolerance);
 
 
-	float lineModifier = 1.0;
-	if (rightDiff || leftDiff || upDiff || downDiff) {
-		lineModifier = 0.0;
+	float lineModifier = rightDiff * leftDiff * upDiff * downDiff * topRightDiff * topLeftDiff * bottonRightDiff * bottomLeftDiff;
+
+	vec2 normalAngle = vec2(0.0);
+
+	if(rightDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, rightLoc).x < 0){
+			normalAngle = getNormal();
+		}
 	}
-	if(topRightDiff || topLeftDiff || bottonRightDiff || bottomLeftDiff){
-		lineModifier = 0.0;
+
+	if(leftDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, leftLoc).x < 0){
+			normalAngle = getNormal();
+		}
 	}
 
-	rtFragColor = vec4(0.0, 0.0, 1.0, 1.0);//vec4(vec3(lineModifier), 1.0);
+	if(upDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, upLoc).x < 0){
+			normalAngle = getNormal();
+		}
+	}
+
+	if(downDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, downLoc).x < 0){
+			normalAngle = getNormal();
+		}
+	}
+	
+	//
+	if(topRightDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, topRightLoc).x < 0){
+			normalAngle = getNormal();
+		}
+	}
+
+	if(topLeftDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, topLeftLoc).x < 0){
+			normalAngle = getNormal();
+		}
+	}
+
+	if(bottonRightDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, bottonRightLoc).x < 0){
+			normalAngle = getNormal();
+		}
+	}
+
+	if(bottomLeftDiff == 0.0){
+		if(camDistance.x - textureProj(uImage00, bottomLeftLoc).x < 0){
+			normalAngle = getNormal();
+		}
+	}
 
 
-	//rtFragColor = vec4(vec3(cos(texCoorVar.x * 40.0 * 3.14159) + 1.0, cos(texCoorVar.y * 40.0 * 3.14159) + 1.0, 0.5), 1.0);
+	rtFragColor = vec4(lineModifier, normalAngle, 1.0);
 
 }

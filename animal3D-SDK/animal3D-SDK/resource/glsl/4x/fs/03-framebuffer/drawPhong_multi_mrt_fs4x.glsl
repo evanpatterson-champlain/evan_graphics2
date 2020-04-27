@@ -143,7 +143,7 @@ void main()
 	viewPosOut = viewSpacePos;
 
 	// normal
-	viewNormOut = vec4(usedNormal, 1.0);
+	viewNormOut = vec4((usedNormal + 1.0) / 2.0, 1.0);
 
 	// texture coordinates
 	texCoorOut = texCoorVar;
